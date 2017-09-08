@@ -90,6 +90,15 @@ public class PreConditionsUnitTests {
         when(Enum.That).isEqualTo(Enum.This).throwIllegalState(ERROR_MESSAGE);
     }
 
+    @Test public void should_throw_IllegalStateException_on_collection_containing_object() throws Exception {
+        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
+        when(NOT_EMPTY_COLLECTION).contains(NOT_NULL_OBJECT).throwIllegalState(ERROR_MESSAGE);
+    }
+
+    @Test public void should_not_throw_IllegalStateException_on_collection_not_containing_object() throws Exception {
+        when(EMPTY_COLLECTION).contains(NOT_NULL_OBJECT).throwIllegalState(ERROR_MESSAGE);
+    }
+
     enum Enum {
         This, That
     }

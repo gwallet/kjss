@@ -113,6 +113,10 @@ public class PreConditions {
         public PreCondition isEmpty() {
             return isNull().or(collection.isEmpty());
         }
+
+        public PreCondition contains(Object object) {
+            return isNull().or(collection.contains(object));
+        }
     }
 
     /**
