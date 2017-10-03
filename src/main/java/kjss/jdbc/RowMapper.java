@@ -14,20 +14,24 @@
  *    limitations under the License.
  *
  */
-package kjss.lang;
+package kjss.jdbc;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Map;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public final class CollectionSupport {
-    public static boolean isNullOrEmpty(@Nullable Collection<?> nullableCollection) {
-        return nullableCollection == null || nullableCollection.isEmpty();
-    }
-    public static boolean isNullOrEmpty(@Nullable Map<?, ?> nullableMap) {
-        return nullableMap == null || nullableMap.isEmpty();
-    }
-    public static boolean isNullOrEmpty(@Nullable Object[] nullableArray) {
-        return nullableArray == null || nullableArray.length == 0;
-    }
+/**
+ * {@link Database#stream(String, RowMapper, Object...)} row mapping object.
+ *
+ * @param <T> the type of object extracted from the DB.
+ */
+@FunctionalInterface
+public interface RowMapper<T> {
+
+    /**
+     * Transforms data from a {@link ResultSet} into an instance of type {@code T}.
+     *
+     * DO NOT MAKE CALL TO {@link ResultSet#next()} IN THIS METHOD.
+     */
+    T mapRow(ResultSet row) throws SQLException;
+
 }

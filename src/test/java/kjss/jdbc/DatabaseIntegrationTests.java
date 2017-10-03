@@ -16,18 +16,39 @@
  */
 package kjss.jdbc;
 
+import com.ninja_squad.dbsetup.DbSetup;
+import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.sql.DataSource;
 import java.sql.Statement;
+import java.util.List;
+
+import static com.ninja_squad.dbsetup.Operations.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DatabaseIntegrationTests {
     private Database database;
 
     @Before public void setUp() throws Exception {
-        database = new Database(datasource());
+        DataSource datasource = datasource();
+        database = new Database(datasource);
+        new DbSetup(new DataSourceDestination(datasource),
+            sequenceOf(
+                sql("CREATE TABLE IF NOT EXISTS city (name TEXT, country TEXT, country_code TEXT)"),
+                truncate("city"),
+                insertInto("city")
+                    .columns("name", "country", "country_code")
+                    .values("Lille", "France", "FR")
+                    .values("Marseille", "France", "FR")
+                    .values("Paris", "France", "FR")
+                    .values("New-York", "United States of America", "US")
+                    .values("London", "England", "UK")
+                    .build()
+            )
+        ).launch();
     }
 
     private DataSource datasource() {
@@ -41,5 +62,21 @@ public class DatabaseIntegrationTests {
             }
             return null;
         });
+    }
+
+    @Test public void should_query_database() throws Exception {
+        List<Integer> results = database.query("SELECT 1", row -> row.getInt(1));
+        assertThat(results).isNotEmpty();
+        assertThat(results).containsExactly(1);
+    }
+
+    @Test public void should_stream_query() throws Exception {
+        database.stream("SELECT name FROM city WHERE country_code = ?", row -> row.getString("name"), "FR")
+            .forEach(System.out::println);
+    }
+
+    @Test public void should_parallel_stream_query() throws Exception {
+        database.parallelStream("SELECT name FROM city WHERE country_code = ?", row -> row.getString("name"), "FR")
+            .forEach(System.out::println);
     }
 }

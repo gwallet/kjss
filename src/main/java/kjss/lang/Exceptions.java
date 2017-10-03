@@ -16,18 +16,10 @@
  */
 package kjss.lang;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Map;
+public class Exceptions {
 
-public final class CollectionSupport {
-    public static boolean isNullOrEmpty(@Nullable Collection<?> nullableCollection) {
-        return nullableCollection == null || nullableCollection.isEmpty();
+    public static RuntimeException unchecked(Throwable error) throws RuntimeException {
+        throw new RuntimeException(error);
     }
-    public static boolean isNullOrEmpty(@Nullable Map<?, ?> nullableMap) {
-        return nullableMap == null || nullableMap.isEmpty();
-    }
-    public static boolean isNullOrEmpty(@Nullable Object[] nullableArray) {
-        return nullableArray == null || nullableArray.length == 0;
-    }
+
 }

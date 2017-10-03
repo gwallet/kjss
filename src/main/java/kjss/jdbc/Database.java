@@ -18,12 +18,21 @@ package kjss.jdbc;
 
 import javax.annotation.Nullable;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLTimeoutException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.util.Spliterators.spliteratorUnknownSize;
 
 /**
  * Handful class to simply query a database.
+ *
+ * To load all data at once in memory, consider using {@link #execute(Query)}.
+ *
+ * For best performance and low memory consumption, consider using {@link #stream(String, RowMapper, Object...)}
+ * or {@link #parallelStream(String, RowMapper, Object...)}.
  */
 public class Database {
     /**
@@ -110,5 +119,81 @@ public class Database {
             if (listener != null) listener.onError(error);
             throw error;
         }
+    }
+
+    /**
+     * Execute the given query and returns all results as a list.
+     *
+     * Example:
+     * {@code
+     *  List<DomainObject> domainObjectList = database.query("SELECT ... FROM ... WHERE ...", DomainObject::new, param1, param2);
+     * }
+     * @param <T> the type of object build by the {@code rowMapper}.
+     * @param sql the SQL statement to use on DB.
+     * @param rowMapper the row mapping strategy.
+     * @param params optional list of parameters to use in the query.
+     * @return Return the {@link List} of all element map to the query results, might be empty if no results are found.
+     * @throws SQLException Propagate the underlying exception to the client.
+     */
+    public <T> List<T> query(String sql, RowMapper<T> rowMapper, Object...params) throws SQLException {
+        return execute(connection -> {
+            ArrayList<T> results = new ArrayList<>();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                int index = 0;
+                for (Object param : params) {
+                    statement.setObject(++index, param);
+                }
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        results.add(rowMapper.mapRow(resultSet));
+                    }
+                }
+            }
+            return results;
+        });
+    }
+
+    /**
+     * Execute and stream the result of the given {@code sql} statement. Each row is mapped before use thanks to the
+     * given {@link RowMapper}.
+     *
+     * Example:
+     * {@code
+     *  database.stream("SELECT ... FROM ... WHERE ...", row -> this::map, param1, param2)
+     *      .foreach(this::consume);
+     * }
+     * @param <T> the type of object build by the {@code rowMapper}.
+     * @param sql the SQL statement to use on DB.
+     * @param rowMapper the row mapping strategy.
+     * @param params optional list of parameters to use in the query.
+     * @return Return a stream of objects build by the {@code rowMapper} with data coming from the database.
+     * @throws SQLException Propagate the underlying exception to the client.
+     */
+    public <T> Stream<T> stream(String sql, RowMapper<T> rowMapper, Object...params) throws SQLException {
+        return _stream(false, sql, rowMapper, params);
+    }
+
+    /**
+     * Execute and stream the result of the given {@code sql} statement in parallel. Each row is mapped before use
+     * thanks to the given {@link RowMapper}.
+     *
+     * Example:
+     * {@code
+     *  database.parallelStream("SELECT ... FROM ... WHERE ...", row -> this::map, param1, param2)
+     *      .foreach(this::consume);
+     * }
+     * @param <T> the type of object build by the {@code rowMapper}.
+     * @param sql the SQL statement to use on DB.
+     * @param params optional list of parameters to use in the query.
+     * @param rowMapper the row mapping strategy.
+     * @return Return a stream of objects build by the {@code rowMapper} with data coming from the database.
+     * @throws SQLException Propagate the underlying exception to the client.
+     */
+    public <T> Stream<T> parallelStream(String sql, RowMapper<T> rowMapper, Object...params) throws SQLException {
+        return _stream(true, sql, rowMapper, params);
+    }
+
+    private <T> Stream<T> _stream(boolean parallel, String sql, RowMapper<T> rowMapper, Object...params) throws SQLException {
+        return StreamSupport.stream(spliteratorUnknownSize(new ResultSetIterator<>(dataSource.getConnection(), sql, rowMapper, params), 0), parallel);
     }
 }
