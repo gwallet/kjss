@@ -67,6 +67,10 @@ public class PreConditions {
         public PreCondition isNull() {
             return PreCondition.when(object == null);
         }
+
+        public PreCondition isNotNull() {
+            return PreCondition.when(object != null);
+        }
     }
 
     /**

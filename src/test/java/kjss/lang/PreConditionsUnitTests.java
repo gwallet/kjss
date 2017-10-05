@@ -46,6 +46,11 @@ public class PreConditionsUnitTests {
         when(NULL_OBJECT).isNull().throwIllegalArgument(ERROR_MESSAGE);
     }
 
+    @Test public void should_throw_IllegalArgumentException_on_non_null_object() throws Exception {
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
+        when(NOT_NULL_OBJECT).isNotNull().throwIllegalArgument(ERROR_MESSAGE);
+    }
+
     @Test public void should_throw_IllegalArgumentException_on_empty_collection() throws Exception {
         expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
         when(EMPTY_COLLECTION).isEmpty().throwIllegalArgument(ERROR_MESSAGE);
