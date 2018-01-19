@@ -40,6 +40,11 @@ public class Database {
      */
     public interface Listener {
         /**
+         * @param connection {@link Connection} to tweak before use.
+         */
+        void onGetConnection(Connection connection) throws SQLException;
+
+        /**
          * @param timeout Timeout error that occurs during connection to database (either login or query).
          */
         void onConnectionTimeout(SQLTimeoutException timeout);
@@ -48,6 +53,17 @@ public class Database {
          * @param error SQL error that occurs during connection to database (either login or query).
          */
         void onError(SQLException error);
+    }
+
+    /**
+     * Default {@link Listener} implementation that does nothing.
+     */
+    public static class Adapter implements Listener {
+        @Override public void onGetConnection(Connection connection) throws SQLException { /* Override me */ }
+
+        @Override public void onConnectionTimeout(SQLTimeoutException timeout) { /* Override me */ }
+
+        @Override public void onError(SQLException error) { /* Override me */ }
     }
 
     private final DataSource dataSource;
@@ -110,7 +126,7 @@ public class Database {
      * @throws SQLException Propagate the underlying exception to the client.
      */
     public @Nullable <T> T execute(Query<T> query) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = _getConnection()) {
             return query.executeOnConnection(connection);
         } catch (SQLTimeoutException timeout) {
             if (listener != null) listener.onConnectionTimeout(timeout);
@@ -194,6 +210,12 @@ public class Database {
     }
 
     private <T> Stream<T> _stream(boolean parallel, String sql, RowMapper<T> rowMapper, Object...params) throws SQLException {
-        return StreamSupport.stream(spliteratorUnknownSize(new ResultSetIterator<>(dataSource.getConnection(), sql, rowMapper, params), 0), parallel);
+        return StreamSupport.stream(spliteratorUnknownSize(new ResultSetIterator<>(_getConnection(), sql, rowMapper, params), 0), parallel);
+    }
+
+    private Connection _getConnection() throws SQLException {
+        Connection connection = dataSource.getConnection();
+        if (listener != null) listener.onGetConnection(connection);
+        return connection;
     }
 }

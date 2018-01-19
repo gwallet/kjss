@@ -48,6 +48,18 @@ public class DatabaseUnitTests {
                 .thenReturn(statement);
     }
 
+    @Test public void should_intercept_getConnection() throws Exception {
+        database.setListener(new Database.Adapter(){
+            @Override public void onGetConnection(Connection connection) throws SQLException {
+                connection.setAutoCommit(false);
+            }
+        });
+
+        executeQuery();
+
+        verify(connection).setAutoCommit(false);
+    }
+
     @Test public void should_report_login_timeout_exception() throws Exception {
         when(dataSource.getConnection())
                 .thenThrow(new SQLTimeoutException("testing login timeout handling"));
