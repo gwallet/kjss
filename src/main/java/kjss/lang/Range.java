@@ -93,7 +93,7 @@ public final class Range<T> {
         Objects.requireNonNull(comparator);
         this.low = Boundary.of(low, lowInclusive, comparator).orElse(Boundary.lowInfinity());
         this.high = Boundary.of(high, highInclusive, comparator).orElse(Boundary.highInfinity());
-        when(this.low.compareTo(this.high) > 0)
+        when(this.low).isGreaterThan(this.high)
                 .throwIllegalArgument("Low value (%s) can not be greater than high value (%s)", low, high);
     }
 
@@ -191,8 +191,8 @@ public final class Range<T> {
                 return lowerThan(((FiniteBoundary<U>)o).value)
                         ? -1
                         : higherThan(((FiniteBoundary<U>)o).value)
-                        ? 1
-                        : 0;
+                                ? 1
+                                : 0;
             } else {
                 return -1 * o.compareTo(this);
             }
