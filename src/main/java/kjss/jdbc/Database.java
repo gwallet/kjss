@@ -16,7 +16,8 @@
  */
 package kjss.jdbc;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
@@ -36,11 +37,12 @@ import static java.util.Spliterators.spliteratorUnknownSize;
  */
 public class Database {
     /**
-     * {@link Database} {@link Listener} used to intercept and deals with {@link SQLTimeoutException} and {@link SQLException}.
+     * {@link Database} {@link Listener listener} used to intercept and deals with {@link SQLTimeoutException} and {@link SQLException}.
      */
     public interface Listener {
         /**
          * @param connection {@link Connection} to tweak before use.
+         * @throws SQLException Execution that can be thrown when setting up the connection.
          */
         void onGetConnection(Connection connection) throws SQLException;
 

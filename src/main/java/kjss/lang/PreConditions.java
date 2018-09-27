@@ -21,6 +21,18 @@ import java.util.Collection;
 /**
  * Armored Harm of defensive programming.
  *
+ * <h3>Usage</h3>
+ * <pre>
+ * public void methodWithSensitiveArgs(String notNullNorEmptyString, int rangeValidIntValue) {
+ *     //  First: check the input
+ *     when(notNullNorEmptyString).isEmpty() // Wil also fail if it's null
+ *         .throwIllegalArgument("Expected not null nor empty string as input, but was null or empty :'(");
+ *     when(rangeValidInValue).isLowerThan(low)
+ *         .or(when(rangeValidInValue).isGreaterThan(high))
+ *         .throwIllegalState("Exceeded the range values, expected to be in [%d, %d] but was out :'(", low, high);
+ * }
+ * </pre>
+ *
  * @see <a href="http://eclipsesource.com/blogs/2013/07/01/when-true-throwillegalargument-something-went-wrong/">
  *     when( true ).throwIllegalArgument( “something went wrong” );
  *     </a>

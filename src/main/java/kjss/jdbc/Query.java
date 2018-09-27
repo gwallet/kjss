@@ -16,7 +16,8 @@
  */
 package kjss.jdbc;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 

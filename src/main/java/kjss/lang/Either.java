@@ -19,6 +19,12 @@ package kjss.lang;
 import java.util.Objects;
 import java.util.function.Function;
 
+/**
+ * Tired to not being able to return Apples XOR Bananas from some very specific method ?
+ *
+ * @param <A> Left hand type that can be shipped in this instance.
+ * @param <B> Right hand type that can be shipped in this instance.
+ */
 public abstract class Either<A, B> {
 
     public static <L, R> Either<L, R> left(L l) {

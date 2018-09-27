@@ -16,10 +16,14 @@
  */
 package kjss.lang;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Collection manipulation utility.
+ */
 public final class CollectionSupport {
     public static boolean isNullOrEmpty(@Nullable Collection<?> nullableCollection) {
         return nullableCollection == null || nullableCollection.isEmpty();

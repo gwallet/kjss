@@ -29,8 +29,12 @@ public interface RowMapper<T> {
 
     /**
      * Transforms data from a {@link ResultSet} into an instance of type {@code T}.
-     *
-     * DO NOT MAKE CALL TO {@link ResultSet#next()} IN THIS METHOD.
+     *<p>
+     * <b>!!! DO NOT MAKE ANY CALL TO {@link ResultSet#next()} or {@link ResultSet#previous()} IN THIS METHOD !!!</b>
+     * </p>
+     * @param row The result to be map as a {@code T} instance.
+     * @return Return the {@code T} instance newly created.
+     * @throws SQLException Exception that can be thrown by using the {@code row}.
      */
     T mapRow(ResultSet row) throws SQLException;
 

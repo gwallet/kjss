@@ -24,12 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static kjss.lang.PreConditions.when;
 
 /**
- * Stupid simple utility class for parsing <b>C</b>omma <b>S</b>eparated <b>V</b>alues files, a.k.a. CSV files.
+ * Stupid simple utility class for parsing <b>C</b>omma <b>S</b>eparated <b>V</b>alues files, a.k.a CSV files.
  *
  * <h3>Usage</h3>
  * <pre>
@@ -50,8 +49,8 @@ import static kjss.lang.PreConditions.when;
  * @see CsvRow
  * @see CsvRow#get(String)
  * @see CsvRow#get(int)
- * @see CsvRow#getAs(String, Function)
- * @see CsvRow#getAs(int, Function)
+ * @see CsvRow#getAs(String, java.util.function.Function)
+ * @see CsvRow#getAs(int, java.util.function.Function)
  */
 public class CsvStream {
     public static final char DEFAULT_FIELD_SEPARATOR = ',';
@@ -68,6 +67,23 @@ public class CsvStream {
         csvFile = file;
     }
 
+    /**
+     * Parsing of a CSV file:
+     * <pre>
+     * new CsvStream(fileToParse)
+     *    .forEach({@link CsvRow row} -&gt; {
+     *       String stringValue = {@link CsvRow#get(String) row.get}("string column name");       // Retrieve raw string value from named column
+     *       int intValue       = {@link CsvRow#getInt(String) row.getInt}("int column name");       // Retrieve native int value from named column
+     *       int columnId       = 42;
+     *       String moreString  = {@link CsvRow#get(int) row.get}(columnId);                   // Retrieve raw string value from indexed column
+     *       UUID uuid          = {@link CsvRow#getAs(String, java.util.function.Function) row.getAs}("uuid", UUID::fromString); // Retrieve an object according to the given type mapper
+     *       // ... doing stuff with values ...
+     *    });
+     * </pre>
+     *
+     * @param block Code that plays with {@link CsvRow rows}.
+     * @throws IOException Error thrown when something went wrong with source file.
+     */
     public void forEach(Consumer<CsvRow> block) throws IOException {
         AtomicBoolean firstLine = new AtomicBoolean(parseHeader);
         Files.readAllLines(csvFile, charset).forEach(line -> {

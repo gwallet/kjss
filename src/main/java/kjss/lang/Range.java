@@ -16,7 +16,8 @@
  */
 package kjss.lang;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Objects;
@@ -38,6 +39,10 @@ import static kjss.lang.PreConditions.when;
  */
 public final class Range<T> {
 
+    /**
+     * Build a new {@link Range} given some basic requirement like boundaries and {@link Comparator comparison method}.
+     * @param <U> Type of the range values.
+     */
     public static final class Builder<U> {
 
         public Builder<U> lowInclusive(@Nullable U low) { return low(low, true); }

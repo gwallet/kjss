@@ -16,6 +16,20 @@
  */
 package kjss.lang;
 
+/**
+ * Make some exceptions more quiet with {@link Exceptions#unchecked(Throwable)}.
+ *
+ * <h3>Usage</h3>
+ * <pre>
+ * public void methodNotSupposedToThrowAnyCheckedException() {
+ *     try {
+ *         // ... do something deadly dangerous ...
+ *     } catch (Exception cause) {
+ *         throw {@link Exceptions#unchecked(Throwable) unchecked}(cause);
+ *     }
+ * }
+ * </pre>
+ */
 public class Exceptions {
 
     public static RuntimeException unchecked(Throwable error) throws RuntimeException {

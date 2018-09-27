@@ -16,7 +16,8 @@
  */
 package kjss.util;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -25,13 +26,15 @@ import static kjss.lang.PreConditions.when;
 
 /**
  * Stupid simple utility class for accessing values in a row.
- *
- * The default {@link #get(String)} (or {@link #get(int)}) retrieves the default raw data read from the file.
- * In addition, {@link #getInt(String)} (or {@link #getInt(int)}) retrieves the int value, 0 (zero) when null.
+ * <p>
+ * The default {@link #get(String)} (or {@link #get(int)}) retrieves the default raw data read from the file.<br>
+ * In addition, {@link #getInt(String)} (or {@link #getInt(int)}) retrieves the int value, 0 (zero) when null.<br>
  * For anything else, {@link #getAs(String, Function)} (or {@link #getAs(int, Function)}) retrieves and map the value,
- * or returns null if none present.
+ * or returns null if none present.<br>
+ * </p>
  *
  * @see CsvStream
+ * @see CsvStream#forEach(java.util.function.Consumer)
  */
 public class CsvRow {
     private final String[] columns;
@@ -57,6 +60,8 @@ public class CsvRow {
      * @throws IllegalArgumentException The given <code>columnName</code> does not match any known columns in the current {@link CsvStream}.
      */
     public int indexOf(String columnName) {
+        when(columnName).isNull()
+            .throwIllegalArgument("Column name can not be null");
         for (int i = 0; i < columns.length; i++) {
             if (columns[i].equals(columnName))
                 return i;
