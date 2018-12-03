@@ -140,8 +140,6 @@
                     <includes>
                         <include>**/*UnitTests.java</include>
                     </includes>
-                    <!-- Workaround to fix https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911925 -->
-                    <useSystemClassLoader>false</useSystemClassLoader>
                 </configuration>
             </plugin>
             <plugin>
@@ -159,8 +157,6 @@
                             <includes>
                                 <include>**/*IntegrationTests.java</include>
                             </includes>
-                            <!-- Workaround to fix https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911925 -->
-                            <useSystemClassLoader>false</useSystemClassLoader>
                         </configuration>
                     </execution>
                 </executions>
