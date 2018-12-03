@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -44,7 +45,7 @@ public class CsvStreamTest {
         stream("no_header.csv")
             .skipHeader()
             .forEach(row -> {
-                assertArrayEquals("Should list 'id' and 'name' as columns, in that order", new String[] {null, null}, row.columns());
+                assertArrayEquals("Should list 'null' and 'null' as columns", new String[] {null, null}, row.columns());
                 assertEquals("Should get the expected row content", expected.get(row.getInt(0)), row.get(1));
                 count.incrementAndGet();
             });
@@ -62,7 +63,7 @@ public class CsvStreamTest {
         stream("simple.scsv")
             .withSeparator(';')
             .forEach(row -> {
-                assertArrayEquals("Should list 'id' and 'name' as columns, in that order", new String[] {"id", "name"}, row.columns());
+                assertArrayEquals("Should list 'id' and 'name' as columns, in that order", new String[] {"id", "name"}, row.columns((col) -> true));
                 assertEquals("Should get the expected row content", expected.get(row.getInt("id")), row.get("name"));
                 assertEquals("Should get the expected row content", expected.get(row.getInt(0)), row.get(1));
                 count.incrementAndGet();

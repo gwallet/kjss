@@ -18,9 +18,12 @@ package kjss.util;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 import static kjss.lang.PreConditions.when;
 
@@ -51,6 +54,12 @@ public class CsvRow {
 
     public String[] columns() {
         return columns;
+    }
+
+    public String[] columns(Predicate<String> filter) {
+        return Arrays.stream(columns)
+            .filter(filter)
+            .toArray(String[]::new);
     }
 
     /**
