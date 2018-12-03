@@ -32,11 +32,12 @@ import static kjss.lang.PreConditions.when;
  *
  * <h3>Usage</h3>
  * <pre>
+ * {@code
  * new CsvStream(fileToParse)
  *    .withSeparator(',')  // Optional, default ',' but can be anything else
  *    .withDelimiter('\"') // Optional, default '"' but can be anything else
- *    .skipHeader()        // Optional, by default the first line is considered as header and give the name for each column
- *    .forEach(row -&gt; {
+ *    .noHeader()          // Optional, by default the first line is considered as header and give the name for each column
+ *    .forEach(row -> {
  *       String stringValue = row.get("string column name");       // Retrieve raw string value from named column
  *       int intValue       = row.getInt("int column name");       // Retrieve native int value from named column
  *       int columnId       = 42;
@@ -44,6 +45,7 @@ import static kjss.lang.PreConditions.when;
  *       UUID uuid          = row.getAs("uuid", UUID::fromString); // Retrieve an object according to the given type mapper
  *       // ... doing stuff with values ...
  *    });
+ * }
  * </pre>
  *
  * @see CsvRow
@@ -70,8 +72,9 @@ public class CsvStream {
     /**
      * Parsing of a CSV file:
      * <pre>
+     * {@code
      * new CsvStream(fileToParse)
-     *    .forEach({@link CsvRow row} -&gt; {
+     *    .forEach({@link CsvRow row} -> {
      *       String stringValue = {@link CsvRow#get(String) row.get}("string column name");       // Retrieve raw string value from named column
      *       int intValue       = {@link CsvRow#getInt(String) row.getInt}("int column name");       // Retrieve native int value from named column
      *       int columnId       = 42;
@@ -79,6 +82,7 @@ public class CsvStream {
      *       UUID uuid          = {@link CsvRow#getAs(String, java.util.function.Function) row.getAs}("uuid", UUID::fromString); // Retrieve an object according to the given type mapper
      *       // ... doing stuff with values ...
      *    });
+     * }
      * </pre>
      *
      * @param block Code that plays with {@link CsvRow rows}.
@@ -157,7 +161,7 @@ public class CsvStream {
         this.charset = charset;
     }
 
-    public CsvStream skipHeader() {
+    public CsvStream noHeader() {
         setParseHeader(false);
         return this;
     }
