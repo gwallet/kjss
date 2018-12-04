@@ -10,8 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.Assert.*;
 
 public class CsvStreamTest {
-    @Test
-    public void should_parse_csv_file() throws Exception {
+    @Test public void should_parse_csv_file() throws Exception {
         Map<String, String> expected = mapOf(
                 "1", "one",
                 "2", "two",
@@ -28,8 +27,7 @@ public class CsvStreamTest {
         assertEquals(3, count.intValue());
     }
 
-    @Test
-    public void should_skip_header() throws Exception {
+    @Test public void should_skip_header() throws Exception {
         Map<Integer, String> expected = mapOf(
                 1, "one",
                 2, "two",
@@ -46,8 +44,7 @@ public class CsvStreamTest {
         assertEquals(3, count.intValue());
     }
 
-    @Test
-    public void should_parse_scsv_file() throws Exception {
+    @Test public void should_parse_scsv_file() throws Exception {
         Map<Integer, String> expected = mapOf(
             1, "one",
             2, "two",
@@ -65,8 +62,7 @@ public class CsvStreamTest {
         assertEquals(3, count.intValue());
     }
 
-    @Test
-    public void should_parse_null_values() throws Exception {
+    @Test public void should_parse_null_values() throws Exception {
         AtomicBoolean checked = new AtomicBoolean(false);
         stream("null_values.csv")
             .forEach(row -> {
@@ -81,8 +77,7 @@ public class CsvStreamTest {
         assertTrue(checked.get());
     }
 
-    @Test
-    public void should_parse_escaped_separator() throws Exception {
+    @Test public void should_parse_escaped_separator() throws Exception {
         AtomicBoolean checked = new AtomicBoolean(false);
         stream("field_delimiter.csv")
                 .forEach(row -> {
@@ -92,8 +87,7 @@ public class CsvStreamTest {
         assertTrue(checked.get());
     }
 
-    @Test
-    public void should_parse_custom_types() throws Exception {
+    @Test public void should_parse_custom_types() throws Exception {
         AtomicBoolean checked = new AtomicBoolean(false);
         UUID expected = UUID.fromString("AE012D8C-EA99-4944-9DBD-EA3E2E743FDE");
         stream("uuid.csv")
@@ -102,6 +96,14 @@ public class CsvStreamTest {
                     checked.set(true);
                 });
         assertTrue(checked.get());
+    }
+
+    @Test public void should_parse_not_all_delimited_rows() throws Exception {
+        stream("not_all_delimited.csv").forEach(row -> {
+            assertNotNull(row.get(0));
+            assertNotNull(row.get(1));
+            assertNotNull(row.get(2));
+        });
     }
 
     private CsvStream stream(String testFile) {

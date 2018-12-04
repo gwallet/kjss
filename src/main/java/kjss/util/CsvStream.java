@@ -115,7 +115,7 @@ public class CsvStream {
         for (; fieldEnd < line.length(); fieldEnd++) {
             char c = line.charAt(fieldEnd);
             if (!delimited && fieldDelimiter == c) {
-                delimited = !delimited;
+                delimited = true;
                 fieldStart = fieldEnd;
             }
             else if ((delimited && fieldDelimiter == c) || (!delimited && fieldSeparator == c)) {
@@ -124,6 +124,7 @@ public class CsvStream {
                 fields.add(count > 0 ? new String(chars, offset, count) : null);
                 if (delimited) fieldEnd++;
                 fieldStart = fieldEnd;
+                delimited = false;
             }
         }
         int offset = fieldStart + 1;
