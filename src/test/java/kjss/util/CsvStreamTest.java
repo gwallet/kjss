@@ -106,6 +106,12 @@ public class CsvStreamTest {
         });
     }
 
+    @Test public void should_parse_escaped_delimiter() throws Exception {
+        stream("escaped_delimiter.csv").forEach(row -> {
+            assertEquals("John \"Hannibal\" Smith", row.get("name"));
+        });
+    }
+
     private CsvStream stream(String testFile) {
         return new CsvStream(Paths.get(System.getProperty("user.dir"), "src", "test", "resources", "kjss", "util", testFile));
     }

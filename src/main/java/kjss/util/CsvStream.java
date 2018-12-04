@@ -16,6 +16,8 @@
  */
 package kjss.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -108,29 +110,56 @@ public class CsvStream {
 
     private String[] parse(String line) {
         List<String> fields = new ArrayList<>();
-        int fieldStart = -1,
+        int fieldStart = 0,
             fieldEnd = 0;
         boolean delimited = false;
         char[] chars = line.toCharArray();
         for (; fieldEnd < line.length(); fieldEnd++) {
             char c = line.charAt(fieldEnd);
-            if (!delimited && fieldDelimiter == c) {
-                delimited = true;
-                fieldStart = fieldEnd;
+            if (fieldDelimiter == c) {
+                if (fieldEnd == fieldStart) {
+                    delimited = true;
+                    fieldStart++;
+                }
+                else if (delimited) {
+                    if (fieldEnd == line.length() - 1) {
+                        fields.add(fieldValueOrNull(chars, fieldStart, fieldEnd));
+                        fieldStart = fieldEnd + 1;
+                    }
+                    else if (fieldSeparator == line.charAt(fieldEnd + 1)) {
+                        fields.add(fieldValueOrNull(chars, fieldStart, fieldEnd));
+                        fieldEnd++;
+                        fieldStart = fieldEnd + 1;
+                        delimited = false;
+                    }
+                    else if (fieldDelimiter == line.charAt(fieldEnd + 1)) {
+                        fieldEnd++;
+                    }
+                }
+                else if (fieldEnd < line.length() - 1 && fieldDelimiter == line.charAt(fieldEnd + 1)) {
+                    fieldEnd++;
+                }
+                else {
+                    throw new RuntimeException("Error reading field delimiter char at index " + fieldEnd);
+                }
             }
-            else if ((delimited && fieldDelimiter == c) || (!delimited && fieldSeparator == c)) {
-                int offset = fieldStart + 1;
-                int count = fieldEnd - offset;
-                fields.add(count > 0 ? new String(chars, offset, count) : null);
-                if (delimited) fieldEnd++;
-                fieldStart = fieldEnd;
-                delimited = false;
+            else if (fieldSeparator == c) {
+                if (!delimited) {
+                    fields.add(fieldValueOrNull(chars, fieldStart, fieldEnd));
+                    fieldStart = fieldEnd + 1;
+                }
             }
         }
-        int offset = fieldStart + 1;
-        int count = fieldEnd - offset;
-        if (count > 0) fields.add(new String(chars, offset, count));
+        if (fieldEnd > fieldStart)
+            fields.add(fieldValueOrNull(chars, fieldStart, fieldEnd));
         return fields.toArray(new String[0]);
+    }
+
+    @Nullable private String fieldValueOrNull(char[] chars, int start, int end) {
+        if (start == end) return null;
+        if (end > chars.length) end = chars.length - 1;
+        return new String(chars, start, end - start)
+            .replaceAll("" + fieldDelimiter + fieldDelimiter, "" + fieldDelimiter);
     }
 
     public CsvStream withSeparator(char separator) {
