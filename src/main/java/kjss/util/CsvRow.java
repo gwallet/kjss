@@ -22,8 +22,8 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
 
 import static kjss.lang.PreConditions.when;
 
@@ -53,7 +53,7 @@ public class CsvRow {
     }
 
     public String[] columns() {
-        return columns;
+        return Arrays.copyOf(columns, columns.length);
     }
 
     public String[] columns(Predicate<String> filter) {
@@ -94,23 +94,28 @@ public class CsvRow {
         return values[columnIndex];
     }
 
+    public boolean getBoolean(String columnName) {
+        return getBoolean(indexOf(columnName));
+    }
+
+    public boolean getBoolean(int columnIndex) {
+        return getAsBoolean(columnIndex, Boolean::parseBoolean);
+    }
+
+    public double getDouble(String columnName) {
+        return getDouble(indexOf(columnName));
+    }
+
+    public double getDouble(int columnIndex) {
+        return getAsDouble(columnIndex, Double::parseDouble);
+    }
+
     public int getInt(String columnName) {
         return getInt(indexOf(columnName));
     }
 
     public int getInt(int columnIndex) {
         return getAsInt(columnIndex, Integer::parseInt);
-    }
-
-    public int getAsInt(String columnName, ToIntFunction<String> mapper) {
-        return getAsInt(indexOf(columnName), mapper);
-    }
-
-    public int getAsInt(int columnIndex, ToIntFunction<String> mapper) {
-        String raw = get(columnIndex);
-        if (raw != null)
-            return mapper.applyAsInt(raw);
-        return 0;
     }
 
     public @Nullable <T> T getAs(String columnName, Function<String, T> mapper) {
@@ -121,5 +126,35 @@ public class CsvRow {
         return Optional.ofNullable(get(columnIndex))
             .map(mapper)
             .orElse(null);
+    }
+
+    public boolean getAsBoolean(String columnName, Predicate<String> mapper) {
+        return getAsBoolean(indexOf(columnName), mapper);
+    }
+
+    public boolean getAsBoolean(int columnIndex, Predicate<String> mapper) {
+        if (isNull(columnIndex)) return false;
+        String raw = get(columnIndex);
+        return mapper.test(raw);
+    }
+
+    public double getAsDouble(String columnName, ToDoubleFunction<String> mapper) {
+        return getAsDouble(indexOf(columnName), mapper);
+    }
+
+    public double getAsDouble(int columnIndex, ToDoubleFunction<String> mapper) {
+        if (isNull(columnIndex)) return 0;
+        String raw = get(columnIndex);
+        return mapper.applyAsDouble(raw);
+    }
+
+    public int getAsInt(String columnName, ToIntFunction<String> mapper) {
+        return getAsInt(indexOf(columnName), mapper);
+    }
+
+    public int getAsInt(int columnIndex, ToIntFunction<String> mapper) {
+        if (isNull(columnIndex)) return 0;
+        String raw = get(columnIndex);
+        return mapper.applyAsInt(raw);
     }
 }

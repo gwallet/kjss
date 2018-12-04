@@ -72,9 +72,8 @@ public class CsvStream {
     /**
      * Parsing of a CSV file:
      * <pre>
-     * {@code
      * new CsvStream(fileToParse)
-     *    .forEach({@link CsvRow row} -> {
+     *    .forEach({@link CsvRow row} -&gt; {
      *       String stringValue = {@link CsvRow#get(String) row.get}("string column name");       // Retrieve raw string value from named column
      *       int intValue       = {@link CsvRow#getInt(String) row.getInt}("int column name");       // Retrieve native int value from named column
      *       int columnId       = 42;
@@ -82,7 +81,6 @@ public class CsvStream {
      *       UUID uuid          = {@link CsvRow#getAs(String, java.util.function.Function) row.getAs}("uuid", UUID::fromString); // Retrieve an object according to the given type mapper
      *       // ... doing stuff with values ...
      *    });
-     * }
      * </pre>
      *
      * @param block Code that plays with {@link CsvRow rows}.
