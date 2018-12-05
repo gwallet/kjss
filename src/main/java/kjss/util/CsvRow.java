@@ -37,7 +37,7 @@ import static kjss.lang.PreConditions.when;
  * </p>
  *
  * @see CsvStream
- * @see CsvStream#forEach(java.util.function.Consumer)
+ * @see CsvStream#forEach(java.util.function.ObjIntConsumer)
  */
 public class CsvRow {
     private final String[] columns;

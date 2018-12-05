@@ -18,7 +18,7 @@ public class CsvStreamTest {
         );
         AtomicInteger count = new AtomicInteger(0);
         stream("simple.csv")
-            .forEach(row -> {
+            .forEach((row, at) -> {
                 assertArrayEquals("Should list 'id' and 'name' as columns, in that order", new String[] {"id", "name"}, row.columns());
                 assertEquals("Should get the expected row content", expected.get(row.get("id")), row.get("name"));
                 assertEquals("Should get the expected row content", expected.get(row.get(0)), row.get(1));
@@ -36,7 +36,8 @@ public class CsvStreamTest {
         AtomicInteger count = new AtomicInteger(0);
         stream("no_header.csv")
             .noHeader()
-            .forEach(row -> {
+            .forEach((row, at) -> {
+                assertEquals("Row index should match row 'id' value", row.getInt("id"), at);
                 assertArrayEquals("Should list 'null' and 'null' as columns", new String[] {null, null}, row.columns());
                 assertEquals("Should get the expected row content", expected.get(row.getInt(0)), row.get(1));
                 count.incrementAndGet();
@@ -53,7 +54,7 @@ public class CsvStreamTest {
         AtomicInteger count = new AtomicInteger(0);
         stream("simple.scsv")
             .withSeparator(';')
-            .forEach(row -> {
+            .forEach((row, at) -> {
                 assertArrayEquals("Should list 'id' and 'name' as columns, in that order", new String[] {"id", "name"}, row.columns((col) -> true));
                 assertEquals("Should get the expected row content", expected.get(row.getInt("id")), row.get("name"));
                 assertEquals("Should get the expected row content", expected.get(row.getInt(0)), row.get(1));
@@ -65,13 +66,13 @@ public class CsvStreamTest {
     @Test public void should_parse_null_values() throws Exception {
         AtomicBoolean checked = new AtomicBoolean(false);
         stream("null_values.csv")
-            .forEach(row -> {
-                if ("first".equals(row.get("first_name")) && "last".equals(row.get("last_name")))
-                    assertTrue("Should read null 'id'", row.isNull("id"));
-                if ("2".equals(row.get("id")))
-                    assertTrue("Should read null 'first_name'", row.isNull(1));
-                if ("3".equals(row.get("id")))
-                    assertTrue("Should read null 'last_name'", row.isNull("last_name"));
+            .forEach((row, at) -> {
+                if (at == 1)
+                    assertTrue("Should read null 'id' at row " + at, row.isNull("id"));
+                if (at == 2)
+                    assertTrue("Should read null 'first_name' at row " + at, row.isNull("first_name"));
+                if (at == 3)
+                    assertTrue("Should read null 'last_name' at row " + at, row.isNull("last_name"));
                 checked.set(true);
             });
         assertTrue(checked.get());
@@ -80,7 +81,7 @@ public class CsvStreamTest {
     @Test public void should_parse_escaped_separator() throws Exception {
         AtomicBoolean checked = new AtomicBoolean(false);
         stream("field_delimiter.csv")
-                .forEach(row -> {
+                .forEach((row, at) -> {
                     assertEquals("Should get the expected row content", "Name, Email", row.get("col"));
                     checked.set(true);
                 });
@@ -91,7 +92,7 @@ public class CsvStreamTest {
         AtomicBoolean checked = new AtomicBoolean(false);
         UUID expected = UUID.fromString("AE012D8C-EA99-4944-9DBD-EA3E2E743FDE");
         stream("uuid.csv")
-                .forEach(row -> {
+                .forEach((row, at) -> {
                     assertEquals("Should get the expected row content", expected, row.getAs("uuid", UUID::fromString));
                     checked.set(true);
                 });
@@ -99,7 +100,7 @@ public class CsvStreamTest {
     }
 
     @Test public void should_parse_not_all_delimited_rows() throws Exception {
-        stream("not_all_delimited.csv").forEach(row -> {
+        stream("not_all_delimited.csv").forEach((row, at) -> {
             assertNotNull(row.get(0));
             assertNotNull(row.get(1));
             assertNotNull(row.get(2));
@@ -107,7 +108,7 @@ public class CsvStreamTest {
     }
 
     @Test public void should_parse_escaped_delimiter() throws Exception {
-        stream("escaped_delimiter.csv").forEach(row -> {
+        stream("escaped_delimiter.csv").forEach((row, at) -> {
             assertEquals("John \"Hannibal\" Smith", row.get("name"));
         });
     }

@@ -25,7 +25,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.ObjIntConsumer;
 
 import static kjss.lang.PreConditions.when;
 
@@ -39,7 +41,7 @@ import static kjss.lang.PreConditions.when;
  *    .withSeparator(',')  // Optional, default ',' but can be anything else
  *    .withDelimiter('\"') // Optional, default '"' but can be anything else
  *    .noHeader()          // Optional, by default the first line is considered as header and give the name for each column
- *    .forEach(row -> {
+ *    .forEach((row, idx) -> {
  *       String stringValue = row.get("string column name");       // Retrieve raw string value from named column
  *       int intValue       = row.getInt("int column name");       // Retrieve native int value from named column
  *       int columnId       = 42;
@@ -75,7 +77,7 @@ public class CsvStream {
      * Parsing of a CSV file:
      * <pre>
      * new CsvStream(fileToParse)
-     *    .forEach({@link CsvRow row} -&gt; {
+     *    .forEach(({@link CsvRow row}, idx) -&gt; {
      *       String stringValue = {@link CsvRow#get(String) row.get}("string column name");       // Retrieve raw string value from named column
      *       int intValue       = {@link CsvRow#getInt(String) row.getInt}("int column name");       // Retrieve native int value from named column
      *       int columnId       = 42;
@@ -88,12 +90,12 @@ public class CsvStream {
      * @param block Code that plays with {@link CsvRow rows}.
      * @throws IOException Error thrown when something went wrong with source file.
      */
-    public void forEach(Consumer<CsvRow> block) throws IOException {
-        AtomicBoolean firstLine = new AtomicBoolean(parseHeader);
+    public void forEach(ObjIntConsumer<CsvRow> block) throws IOException {
+        AtomicInteger rowIndex = new AtomicInteger(0);
         Files.readAllLines(csvFile, charset).forEach(line -> {
             if (line.isEmpty())
-                return; //  Skip the empty lines
-            if (firstLine.compareAndSet(true, false)) {
+                return; //  Skip empty lines
+            if (rowIndex.get() == 0 && parseHeader) {
                 columns = parse(line);
             } else {
                 String[] split = parse(line);
@@ -103,8 +105,9 @@ public class CsvStream {
                 when(split.length).isGreaterThan(columns.length)
                     .throwIllegalState("Too many values for the number of known columns");
                 System.arraycopy(split, 0, values, 0, split.length);
-                block.accept(new CsvRow(columns, values));
+                block.accept(new CsvRow(columns, values), rowIndex.get());
             }
+            rowIndex.incrementAndGet();
         });
     }
 
@@ -157,7 +160,7 @@ public class CsvStream {
 
     @Nullable private String fieldValueOrNull(char[] chars, int start, int end) {
         if (start == end) return null;
-        if (end > chars.length) end = chars.length - 1;
+        if (end > chars.length) end = chars.length;
         return new String(chars, start, end - start)
             .replaceAll("" + fieldDelimiter + fieldDelimiter, "" + fieldDelimiter);
     }
