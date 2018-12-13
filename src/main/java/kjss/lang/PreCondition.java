@@ -17,6 +17,7 @@
 package kjss.lang;
 
 import java.util.IllegalFormatException;
+import java.util.function.Supplier;
 
 import static java.lang.String.format;
 
@@ -49,6 +50,15 @@ public abstract class PreCondition {
     public abstract void throwIllegalArgument(String format, Object... args);
 
     /**
+     * When something went wrong, throw an {@linkplain IllegalArgumentException} with the given formatted message.
+     *
+     * @param format the message format to be printed to humans about what just happened.
+     * @param argsSupplier Provide the message argument when needed
+     * @see String#format(String, Object...) for more details about formatted messages.
+     */
+    public abstract void throwIllegalArgument(String format, Supplier<Object[]> argsSupplier);
+
+    /**
      * When something went wrong, throw an {@linkplain IllegalStateException} with the given message.
      *
      * @param message the message to be printed to humans about what just happened.
@@ -63,6 +73,15 @@ public abstract class PreCondition {
      * @see String#format(String, Object...) for more details about formatted messages.
      */
     public abstract void throwIllegalState(String format, Object... args);
+
+    /**
+     * When something went wrong, throw an {@linkplain IllegalStateException} with the given formatted message.
+     *
+     * @param format the message format to be printed to humans about what just happened.
+     * @param argsSupplier Provide the message argument when needed
+     * @see String#format(String, Object...) for more details about formatted messages.
+     */
+    public abstract void throwIllegalState(String format, Supplier<Object[]> argsSupplier);
 
     /**
      * Combine this pre condition with a new one according to OR logical operator.
@@ -96,8 +115,10 @@ public abstract class PreCondition {
     private static final class ExpectedCondition extends PreCondition {
         @Override public void throwIllegalArgument(String message) {}
         @Override public void throwIllegalArgument(String format, Object... args) {}
+        @Override public void throwIllegalArgument(String format, Supplier<Object[]> argsSupplier) {}
         @Override public void throwIllegalState(String message) {}
         @Override public void throwIllegalState(String format, Object... args) {}
+        @Override public void throwIllegalState(String format, Supplier<Object[]> argsSupplier) {}
         @Override public PreCondition or(boolean somethingWentWrong) {
             return when(somethingWentWrong);
         }
@@ -113,6 +134,9 @@ public abstract class PreCondition {
         @Override public void throwIllegalArgument(String format, Object... args) {
             throwIllegalArgument(safeFormat(format, args));
         }
+        @Override public void throwIllegalArgument(String format, Supplier<Object[]> argsSupplier) {
+            throwIllegalArgument(safeFormat(format, argsSupplier.get()));
+        }
         private String safeFormat(String format, Object[] args) {
             try {
                 return format(format, args);
@@ -125,6 +149,9 @@ public abstract class PreCondition {
         }
         @Override public void throwIllegalState(String format, Object... args) {
             throwIllegalState(safeFormat(format, args));
+        }
+        @Override public void throwIllegalState(String format, Supplier<Object[]> argsSupplier) {
+            throwIllegalState(safeFormat(format, argsSupplier.get()));
         }
         @Override public PreCondition or(boolean somethingWentWrong) {
             return this;
