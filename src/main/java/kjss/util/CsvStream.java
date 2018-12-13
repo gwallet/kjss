@@ -16,18 +16,9 @@
  */
 package kjss.util;
 
-import org.jetbrains.annotations.Nullable;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
+import java.util.stream.Stream;
 
 import static kjss.lang.PreConditions.when;
 
@@ -37,132 +28,47 @@ import static kjss.lang.PreConditions.when;
  * <h3>Usage</h3>
  * <pre>
  * {@code
- * new CsvStream(fileToParse)
+ * new CsvStream(Files.lines(Paths.get(pathToFile)))
  *    .withSeparator(',')  // Optional, default ',' but can be anything else
  *    .withDelimiter('\"') // Optional, default '"' but can be anything else
  *    .noHeader()          // Optional, by default the first line is considered as header and give the name for each column
  *    .forEach((row, idx) -> {
- *       String stringValue = row.get("string column name");       // Retrieve raw string value from named column
- *       int intValue       = row.getInt("int column name");       // Retrieve native int value from named column
+ *       String stringValue = row.get("string column name").rawString(); // Retrieve raw string value from named column
+ *       int intValue       = row.getInt("int column name").toInt();     // Retrieve native int value from named column
  *       int columnId       = 42;
- *       String moreString  = row.get(columnId);                   // Retrieve raw string value from indexed column
- *       UUID uuid          = row.getAs("uuid", UUID::fromString); // Retrieve an object according to the given type mapper
+ *       String moreString  = row.get(columnId).toString();              // Retrieve clean string value from indexed column
+ *       UUID uuid          = row.get("uuid").as(UUID::fromString);      // Retrieve an object according to the given type mapper
+ *       long timestamp     = row.get("timestamp").asLong(c -> c.isNull() ? Long.MIN_VALUE : Long.parseLong(c.toString()));
  *       // ... doing stuff with values ...
  *    });
  * }
  * </pre>
- *
- * @see CsvRow
- * @see CsvRow#get(String)
- * @see CsvRow#get(int)
- * @see CsvRow#getAs(String, java.util.function.Function)
- * @see CsvRow#getAs(int, java.util.function.Function)
  */
 public class CsvStream {
     public static final char DEFAULT_FIELD_SEPARATOR = ',';
     public static final char DEFAULT_FIELD_DELIMITER = '\"';
-    public static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
-    private Path csvFile;
-    private String[] columns;
-    private char fieldSeparator = DEFAULT_FIELD_SEPARATOR;
-    private char fieldDelimiter = DEFAULT_FIELD_DELIMITER;
-    private Charset charset = DEFAULT_CHARSET;
+    private CsvRow header;
+    char fieldSeparator = DEFAULT_FIELD_SEPARATOR;
+    char fieldDelimiter = DEFAULT_FIELD_DELIMITER;
     private boolean parseHeader = true;
+    private Stream<String> lines;
 
-    public CsvStream(Path file) {
-        csvFile = file;
+    public CsvStream(Stream<String> lines) {
+        this.lines = lines;
     }
 
-    /**
-     * Parsing of a CSV file:
-     * <pre>
-     * new CsvStream(fileToParse)
-     *    .forEach(({@link CsvRow row}, idx) -&gt; {
-     *       String stringValue = {@link CsvRow#get(String) row.get}("string column name");       // Retrieve raw string value from named column
-     *       int intValue       = {@link CsvRow#getInt(String) row.getInt}("int column name");       // Retrieve native int value from named column
-     *       int columnId       = 42;
-     *       String moreString  = {@link CsvRow#get(int) row.get}(columnId);                   // Retrieve raw string value from indexed column
-     *       UUID uuid          = {@link CsvRow#getAs(String, java.util.function.Function) row.getAs}("uuid", UUID::fromString); // Retrieve an object according to the given type mapper
-     *       // ... doing stuff with values ...
-     *    });
-     * </pre>
-     *
-     * @param block Code that plays with {@link CsvRow rows}.
-     * @throws IOException Error thrown when something went wrong with source file.
-     */
-    public void forEach(ObjIntConsumer<CsvRow> block) throws IOException {
+    public void forEach(ObjIntConsumer<CsvRow> block) {
         AtomicInteger rowIndex = new AtomicInteger(0);
-        Files.readAllLines(csvFile, charset).forEach(line -> {
+        lines.forEach(line -> {
             if (line.isEmpty())
                 return; //  Skip empty lines
             if (rowIndex.get() == 0 && parseHeader) {
-                columns = parse(line);
+                header = new CsvRow(this, 0, null).parse(line);
             } else {
-                String[] split = parse(line);
-                if (columns == null)
-                    columns = new String[split.length];
-                String[] values = new String[columns.length];
-                when(split.length).isGreaterThan(columns.length)
-                    .throwIllegalState("Too many values for the number of known columns");
-                System.arraycopy(split, 0, values, 0, split.length);
-                block.accept(new CsvRow(columns, values), rowIndex.get());
+                block.accept(new CsvRow(this, rowIndex.get(), header).parse(line), rowIndex.get());
             }
             rowIndex.incrementAndGet();
         });
-    }
-
-    private String[] parse(String line) {
-        List<String> fields = new ArrayList<>();
-        int fieldStart = 0,
-            fieldEnd = 0;
-        boolean delimited = false;
-        char[] chars = line.toCharArray();
-        for (; fieldEnd < line.length(); fieldEnd++) {
-            char c = line.charAt(fieldEnd);
-            if (fieldDelimiter == c) {
-                if (fieldEnd == fieldStart) {
-                    delimited = true;
-                    fieldStart++;
-                }
-                else if (delimited) {
-                    if (fieldEnd == line.length() - 1) {
-                        fields.add(fieldValueOrNull(chars, fieldStart, fieldEnd));
-                        fieldStart = fieldEnd + 1;
-                    }
-                    else if (fieldSeparator == line.charAt(fieldEnd + 1)) {
-                        fields.add(fieldValueOrNull(chars, fieldStart, fieldEnd));
-                        fieldEnd++;
-                        fieldStart = fieldEnd + 1;
-                        delimited = false;
-                    }
-                    else if (fieldDelimiter == line.charAt(fieldEnd + 1)) {
-                        fieldEnd++;
-                    }
-                }
-                else if (fieldEnd < line.length() - 1 && fieldDelimiter == line.charAt(fieldEnd + 1)) {
-                    fieldEnd++;
-                }
-                else {
-                    throw new RuntimeException("Error reading field delimiter char at index " + fieldEnd);
-                }
-            }
-            else if (fieldSeparator == c) {
-                if (!delimited) {
-                    fields.add(fieldValueOrNull(chars, fieldStart, fieldEnd));
-                    fieldStart = fieldEnd + 1;
-                }
-            }
-        }
-        if (fieldEnd > fieldStart)
-            fields.add(fieldValueOrNull(chars, fieldStart, fieldEnd));
-        return fields.toArray(new String[0]);
-    }
-
-    @Nullable private String fieldValueOrNull(char[] chars, int start, int end) {
-        if (start == end) return null;
-        if (end > chars.length) end = chars.length;
-        return new String(chars, start, end - start)
-            .replaceAll("" + fieldDelimiter + fieldDelimiter, "" + fieldDelimiter);
     }
 
     public CsvStream withSeparator(char separator) {
@@ -181,15 +87,6 @@ public class CsvStream {
 
     public void setFieldDelimiter(char fieldDelimiter) {
         this.fieldDelimiter = fieldDelimiter;
-    }
-
-    public CsvStream withCharset(Charset charset) {
-        setCharset(charset);
-        return this;
-    }
-
-    public void setCharset(Charset charset) {
-        this.charset = charset;
     }
 
     public CsvStream noHeader() {
