@@ -36,4 +36,16 @@ public class Exceptions {
         throw new RuntimeException(error);
     }
 
+    public static <T> T unchecked(DangerousRunnable<T> code) throws RuntimeException {
+        try {
+            return code.execute();
+        } catch (Throwable error) {
+            throw new RuntimeException(error);
+        }
+    }
+
+    @FunctionalInterface
+    public interface DangerousRunnable<R> {
+        R execute() throws Throwable;
+    }
 }

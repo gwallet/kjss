@@ -34,6 +34,14 @@ public class ExceptionsUnitTest {
         die();
     }
 
+    @Test public void should_wrap_exception_from_Runnable_in_runtime() throws Exception {
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectCause(isA(CheckedException.class));
+        Exceptions.unchecked(() -> {
+            throw new CheckedException();
+        });
+    }
+
     private void die() {
         throw unchecked(new CheckedException());
     }

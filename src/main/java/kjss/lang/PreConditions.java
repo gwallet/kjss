@@ -182,6 +182,10 @@ public class PreConditions {
             return isNull().or(comparable.compareTo(other) == 0);
         }
 
+        public PreCondition isNotEqualTo(C other) {
+            return isNull().or(comparable.compareTo(other) != 0);
+        }
+
         public PreCondition isGreaterThan(C other) {
             return isNull().or(comparable.compareTo(other) > 0);
         }

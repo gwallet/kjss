@@ -91,6 +91,11 @@ public class PreConditionsUnitTests {
         when(Enum.This).isEqualTo(Enum.This).throwIllegalState(ERROR_MESSAGE);
     }
 
+    @Test public void should_throw_IllegalStateException_on_enum_not_equal() throws Exception {
+        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
+        when(Enum.This).isNotEqualTo(Enum.That).throwIllegalState(ERROR_MESSAGE);
+    }
+
     @Test public void should_not_throw_IllegalStateException_on_enum_equals() throws Exception {
         when(Enum.That).isEqualTo(Enum.This).throwIllegalState(ERROR_MESSAGE);
     }
