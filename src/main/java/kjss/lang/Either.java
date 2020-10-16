@@ -16,8 +16,9 @@
  */
 package kjss.lang;
 
-import java.util.Objects;
 import java.util.function.Function;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Tired to not being able to return Apples XOR Bananas from some very specific method ?
@@ -28,13 +29,11 @@ import java.util.function.Function;
 public abstract class Either<A, B> {
 
     public static <L, R> Either<L, R> left(L l) {
-        Objects.requireNonNull(l);
-        return new Left<>(l);
+        return new Left<>(requireNonNull(l));
     }
 
     public static <L, R> Either<L, R> right(R r) {
-        Objects.requireNonNull(r);
-        return new Right<>(r);
+        return new Right<>(requireNonNull(r));
     }
 
     public boolean isLeft() {
