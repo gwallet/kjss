@@ -17,6 +17,7 @@
 package kjss.util;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.ObjIntConsumer;
 import java.util.stream.Stream;
 
@@ -69,6 +70,11 @@ public class CsvStream {
             }
             rowIndex.incrementAndGet();
         });
+    }
+
+    public <T> Stream<T> map(Function<CsvRow, T> mapper) {
+        AtomicInteger rowIndex = new AtomicInteger(0);
+        return lines.map(line -> mapper.apply(new CsvRow(this, rowIndex.getAndIncrement(), null).parse(line)));
     }
 
     public CsvStream withSeparator(char separator) {

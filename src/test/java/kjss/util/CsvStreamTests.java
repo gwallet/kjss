@@ -10,13 +10,59 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class CsvStreamTests {
+    @Test public void should_distinct_random_lines() {
+        int maxSize = 35000;
+        int batchSize = 300;
+        IntStream randomize = IntStream.generate(() -> (int) ( Math.random() * batchSize));
+        Set<Integer> integers = new CsvStream(randomize.limit(maxSize)
+                                                       .mapToObj(Integer::toString))
+            .noHeader()
+            .map(row -> Integer.parseInt(row.get(0).toString()))
+            .collect(Collectors.toSet());
+        assertEquals("Should get 300 integers", integers.size(), batchSize);
+    }
+
+    @Test public void should_distinct_sequential_lines() {
+        int maxSize = 35000;
+        int batchSize = 300;
+        AtomicInteger count = new AtomicInteger(0);
+        IntStream sequential = IntStream.generate(() -> count.getAndUpdate(c -> (c + 1) % batchSize));
+        Set<Integer> integers = new CsvStream(sequential.limit(maxSize)
+                                                        .mapToObj(Integer::toString))
+            .noHeader()
+            .map(row -> Integer.parseInt(row.get(0).toString()))
+            .collect(Collectors.toSet());
+        assertEquals("Should get 300 integers", integers.size(), batchSize);
+    }
+
+    @Test public void should_distinct_sequential_batch_lines() {
+        int maxSize = 35000;
+        int batchSize = 300;
+        AtomicInteger count = new AtomicInteger(0);
+        IntStream sequential = IntStream.generate(count::getAndIncrement)
+                                        .map(c -> c * batchSize / maxSize);
+        Set<Integer> integers = new CsvStream(sequential.limit(maxSize)
+                                                        .mapToObj(Integer::toString))
+            .noHeader()
+            .map(row -> Integer.parseInt(row.get(0).toString()))
+            .collect(Collectors.toSet());
+        assertEquals("Should get 300 integers", integers.size(), batchSize);
+    }
+
     @Test public void should_parse_csv_file() throws Exception {
         Map<String, String> expected = mapOf(
                 "1", "one",

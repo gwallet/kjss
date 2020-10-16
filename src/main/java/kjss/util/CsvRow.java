@@ -39,7 +39,7 @@ public class CsvRow {
         List<CsvCell> cellList = new ArrayList<>();
         int start = 0,
             end = 0,
-            index = 0;
+            index = 1;
         boolean escaped = false;
         for (; end < line.length(); end++) {
             char c = line.charAt(end);
@@ -87,9 +87,11 @@ public class CsvRow {
 
     /**
      * @param columnName Name of the column we want the index.
-     * @return Returns the index of the given column.
+     * @return Returns the 1-based index of the given column.
      *
      * @throws IllegalArgumentException The given <code>columnName</code> does not match any known columns in the current {@link CsvStream}.
+     *
+     * @see #cellAtIndex(int)
      */
     public int indexOf(String columnName) {
         when(columnName).isNull()
@@ -98,16 +100,29 @@ public class CsvRow {
             .throwIllegalState("No header defined");
         for (int i = 0; i < header.cells.length; i++) {
             if (header.cells[i].toString().equals(columnName))
-                return i;
+                return header.cells[i].index();
         }
         throw new IllegalArgumentException("Unknown column " + columnName);
     }
 
     public CsvCell get(String columnName) {
-        return get(indexOf(columnName));
+        return cellAtIndex(indexOf(columnName));
     }
 
+    /**
+     * @param cellIndex 1-based cell index.
+     */
+    public CsvCell cellAtIndex(int cellIndex) {
+        return get(cellIndex - 1);
+    }
+
+    /**
+     * @param columnIndex 0-based column index.
+     */
     public CsvCell get(int columnIndex) {
+        when(columnIndex).isLowerThan(0)
+            .or(when(columnIndex).isGreaterThanOrEqualTo(cells.length))
+            .throwIllegalArgument("No column at index " + columnIndex);
         return cells[columnIndex];
     }
 
