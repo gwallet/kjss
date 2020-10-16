@@ -47,21 +47,21 @@
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.3.0</version>
+            <version>3.14.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -73,7 +73,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.190</version>
+            <version>1.4.200</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -135,9 +135,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.20.1</version>
+                <version>3.0.0-M5</version>
                 <configuration>
                     <skip>${skip.unit.tests}</skip>
+                    <excludes>
+                        <exclude/><!-- Do not exclude inner-classes tests -->
+                    </excludes>
                     <includes>
                         <include>**/*UnitTests.java</include>
                     </includes>
@@ -146,7 +149,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.20.1</version>
+                <version>3.0.0-M5</version>
                 <executions>
                     <execution>
                         <goals>
@@ -155,6 +158,9 @@
                         </goals>
                         <configuration>
                             <skip>${skip.integration.tests}</skip>
+                            <excludes>
+                                <exclude/><!-- Do not exclude inner-classes tests -->
+                            </excludes>
                             <includes>
                                 <include>**/*IntegrationTests.java</include>
                             </includes>
@@ -180,7 +186,7 @@
 
     <profiles>
         <profile>
-            <id>dev</id>
+            <id>unit-tests</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -193,6 +199,13 @@
             <id>integration-tests</id>
             <properties>
                 <skip.unit.tests>true</skip.unit.tests>
+                <skip.integration.tests>false</skip.integration.tests>
+            </properties>
+        </profile>
+        <profile>
+            <id>all-tests</id>
+            <properties>
+                <skip.unit.tests>false</skip.unit.tests>
                 <skip.integration.tests>false</skip.integration.tests>
             </properties>
         </profile>

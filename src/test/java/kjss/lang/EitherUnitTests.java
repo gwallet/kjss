@@ -16,12 +16,13 @@
  */
 package kjss.lang;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.function.Function.identity;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EitherUnitTests {
     @Test public void should_return_left() throws Exception {
@@ -38,17 +39,19 @@ public class EitherUnitTests {
         assertThat(either.map(identity(), integer -> integer.toString())).isEqualTo("42");
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void should_throw_when_is_right_and_asking_for_left() throws Exception {
-        Either<String, Integer> either = Either.right(42);
-        assertFalse(either.isLeft());
-        assertThat(either.left()).isEqualTo(42);
+    @Test public void should_throw_when_is_right_and_asking_for_left() throws Exception {
+        assertThrows(IllegalStateException.class, () -> {
+            Either<String, Integer> either = Either.right(42);
+            assertFalse(either.isLeft());
+            assertThat(either.left()).isEqualTo(42);
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void should_throw_when_is_left_and_asking_for_right() throws Exception {
-        Either<String, Integer> either = Either.left("42");
-        assertFalse(either.isRight());
-        assertThat(either.right()).isEqualTo("42");
+    @Test public void should_throw_when_is_left_and_asking_for_right() throws Exception {
+        assertThrows(IllegalStateException.class, () -> {
+            Either<String, Integer> either = Either.left("42");
+            assertFalse(either.isRight());
+            assertThat(either.right()).isEqualTo("42");
+        });
     }
 }

@@ -19,8 +19,8 @@ package kjss.jdbc;
 import com.ninja_squad.dbsetup.DbSetup;
 import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import java.sql.Statement;
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DatabaseIntegrationTests {
     private Database database;
 
-    @Before public void setUp() throws Exception {
+    @BeforeEach public void setUp() throws Exception {
         DataSource datasource = datasource();
         database = new Database(datasource);
         new DbSetup(new DataSourceDestination(datasource),

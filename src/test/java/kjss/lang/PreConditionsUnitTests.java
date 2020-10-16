@@ -17,15 +17,16 @@
 package kjss.lang;
 
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.Collection;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static kjss.lang.PreConditions.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PreConditionsUnitTests {
     public static final Object NULL_OBJECT = null;
@@ -40,71 +41,82 @@ public class PreConditionsUnitTests {
     public static final long BIG_MAGIC_NUMBER = ((long) Integer.MAX_VALUE) + 1;
     public static final String ERROR_MESSAGE = "message";
 
-    @Rule public ExpectedException expectedException = ExpectedException.none();
-
     @Test public void should_throw_IllegalArgumentException_on_null_object() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(NULL_OBJECT).isNull().throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(NULL_OBJECT).isNull().throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_on_non_null_object() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(NOT_NULL_OBJECT).isNotNull().throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(NOT_NULL_OBJECT).isNotNull().throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_on_empty_collection() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(EMPTY_COLLECTION).isEmpty().throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(EMPTY_COLLECTION).isEmpty().throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_on_empty_array() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(EMPTY_ARRAY).isEmpty().throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(EMPTY_ARRAY).isEmpty().throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_when_array_not_empty() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(NOT_EMPTY_ARRAY).sizeDifferentThan(0).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(NOT_EMPTY_ARRAY).sizeDifferentThan(0).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_on_empty_string() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(EMPTY_STRING).isEmpty().throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(EMPTY_STRING).isEmpty().throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_on_too_big_numbers() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(MAGIC_NUMBER + 1).isGreaterThan(MAGIC_NUMBER).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(MAGIC_NUMBER + 1).isGreaterThan(MAGIC_NUMBER).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_on_edge_too_big_numbers() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(MAGIC_NUMBER).isGreaterThanOrEqualTo(MAGIC_NUMBER).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(MAGIC_NUMBER).isGreaterThanOrEqualTo(MAGIC_NUMBER).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_on_too_small_numbers() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(MAGIC_NUMBER).isLowerThan(MAGIC_NUMBER + 1).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(MAGIC_NUMBER).isLowerThan(MAGIC_NUMBER + 1).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_on_edge_too_small_numbers() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(MAGIC_NUMBER).isLowerThanOrEqualTo(MAGIC_NUMBER).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(MAGIC_NUMBER).isLowerThanOrEqualTo(MAGIC_NUMBER).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_on_not_negative_big_numbers() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(BIG_MAGIC_NUMBER).isGreaterThan(0).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(BIG_MAGIC_NUMBER).isGreaterThan(0).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalStateException_on_enum_equals() throws Exception {
-        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
-        when(Enum.This).isEqualTo(Enum.This).throwIllegalState(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE, () -> {
+            when(Enum.This).isEqualTo(Enum.This).throwIllegalState(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalStateException_on_enum_not_equal() throws Exception {
-        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
-        when(Enum.This).isNotEqualTo(Enum.That).throwIllegalState(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE, () -> {
+            when(Enum.This).isNotEqualTo(Enum.That).throwIllegalState(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_not_throw_IllegalStateException_on_enum_equals() throws Exception {
@@ -112,13 +124,15 @@ public class PreConditionsUnitTests {
     }
 
     @Test public void should_throw_IllegalStateException_on_collection_containing_object() throws Exception {
-        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
-        when(NOT_EMPTY_COLLECTION).contains(NOT_NULL_OBJECT).throwIllegalState(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE, () -> {
+            when(NOT_EMPTY_COLLECTION).contains(NOT_NULL_OBJECT).throwIllegalState(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalStateException_on_collection_with_size_different_than_expected() throws Exception {
-        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
-        when(NOT_EMPTY_COLLECTION).sizeDifferentThan(0).throwIllegalState(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE, () -> {
+            when(NOT_EMPTY_COLLECTION).sizeDifferentThan(0).throwIllegalState(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_not_throw_IllegalStateException_on_collection_not_containing_object() throws Exception {
@@ -140,8 +154,9 @@ public class PreConditionsUnitTests {
                 .throwIllegalArgument(ERROR_MESSAGE);
     }
 
-    private void expectExceptionAndMessage(Class<? extends Throwable> exceptionClass, String message) {
-        expectedException.expect(exceptionClass);
-        expectedException.expectMessage(message);
+    private void expectExceptionAndMessage(Class<? extends Throwable> exceptionClass, String expectedMessage, Executable block) {
+        Throwable actualThrowable = assertThrows(exceptionClass, block);
+        assertEquals(actualThrowable.getMessage(), expectedMessage);
     }
+
 }

@@ -16,60 +16,64 @@
  */
 package kjss.lang;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import static kjss.lang.PreCondition.when;
 import static kjss.lang.PreCondition.whenNot;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PreConditionUnitTests {
     public static final boolean ILLEGAL_CONDITION = true;
     public static final boolean LEGAL_CONDITION = false;
-
-    @Rule public ExpectedException expectedException = ExpectedException.none();
 
     public static final String EXPECTED_FORMATTED_MESSAGE = "condition should be false but was true";
     public static final String ERROR_MESSAGE_FORMAT = "condition should be false but was %b";
     public static final String ERROR_MESSAGE = "message";
 
     @Test public void should_throw_IllegalArgumentException_with_message() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(ILLEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(ILLEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_also_throw_IllegalArgumentException_with_message() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        whenNot(LEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            whenNot(LEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_with_formatted_message() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, EXPECTED_FORMATTED_MESSAGE);
-        boolean condition = ILLEGAL_CONDITION;
-        when(condition).throwIllegalArgument(ERROR_MESSAGE_FORMAT, condition);
+        expectExceptionAndMessage(IllegalArgumentException.class, EXPECTED_FORMATTED_MESSAGE, () -> {
+            boolean condition = ILLEGAL_CONDITION;
+            when(condition).throwIllegalArgument(ERROR_MESSAGE_FORMAT, condition);
+        });
     }
 
     @Test public void should_throw_IllegalArgumentException_with_bad_formatted_message() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE_FORMAT);
-        boolean condition = ILLEGAL_CONDITION;
-        when(condition).throwIllegalArgument(ERROR_MESSAGE_FORMAT, new Object[0]);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE_FORMAT, () -> {
+            when(ILLEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE_FORMAT, new Object[0]);
+        });
     }
 
     @Test public void should_throw_IllegalStateException_with_message() throws Exception {
-        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
-        when(ILLEGAL_CONDITION).throwIllegalState(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE, () -> {
+            when(ILLEGAL_CONDITION).throwIllegalState(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_throw_IllegalStateException_with_formatted_message() throws Exception {
-        expectExceptionAndMessage(IllegalStateException.class, EXPECTED_FORMATTED_MESSAGE);
-        boolean condition = ILLEGAL_CONDITION;
-        when(condition).throwIllegalState(ERROR_MESSAGE_FORMAT, condition);
+        expectExceptionAndMessage(IllegalStateException.class, EXPECTED_FORMATTED_MESSAGE, () -> {
+            boolean condition = ILLEGAL_CONDITION;
+            when(condition).throwIllegalState(ERROR_MESSAGE_FORMAT, condition);
+        });
     }
 
     @Test public void should_throw_IllegalStateException_with_bad_formatted_message() throws Exception {
-        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE_FORMAT);
-        boolean condition = ILLEGAL_CONDITION;
-        when(condition).throwIllegalState(ERROR_MESSAGE_FORMAT, new Object[0]);
+        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE_FORMAT, () -> {
+            when(ILLEGAL_CONDITION).throwIllegalState(ERROR_MESSAGE_FORMAT, new Object[0]);
+        });
     }
 
     @Test public void should_not_throw_IllegalArgumentException() throws Exception {
@@ -78,13 +82,15 @@ public class PreConditionUnitTests {
     }
 
     @Test public void should_combine_conditions() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(LEGAL_CONDITION).or(ILLEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(LEGAL_CONDITION).or(ILLEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_combine_conditions_inverse() throws Exception {
-        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
-        when(ILLEGAL_CONDITION).or(LEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(ILLEGAL_CONDITION).or(LEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
+        });
     }
 
     @Test public void should_not_throw_IllegalStateException() throws Exception {
@@ -92,8 +98,9 @@ public class PreConditionUnitTests {
         when(LEGAL_CONDITION).throwIllegalState(ERROR_MESSAGE_FORMAT, LEGAL_CONDITION);
     }
 
-    private void expectExceptionAndMessage(Class<? extends Throwable> exceptionClass, String message) {
-        expectedException.expect(exceptionClass);
-        expectedException.expectMessage(message);
+    private void expectExceptionAndMessage(Class<? extends Throwable> exceptionClass, String expectedMessage, Executable block) {
+        Throwable actualThrowable = assertThrows(exceptionClass, block);
+        assertEquals(actualThrowable.getMessage(), expectedMessage);
     }
+
 }

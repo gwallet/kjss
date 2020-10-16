@@ -16,11 +16,11 @@
  */
 package kjss.jdbc;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -28,10 +28,13 @@ import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DatabaseUnitTests {
     private Database database;
     @Mock protected Database.Listener listener;
@@ -39,16 +42,16 @@ public class DatabaseUnitTests {
     @Mock private Connection connection;
     @Mock private Statement statement;
 
-    @Before public void setUp() throws Exception {
+    @BeforeEach public void setUp() throws Exception {
         database = new Database(dataSource)
                 .withListener(listener);
         when(dataSource.getConnection())
                 .thenReturn(connection);
-        when(connection.createStatement())
-                .thenReturn(statement);
     }
 
     @Test public void should_intercept_getConnection() throws Exception {
+        when(connection.createStatement())
+            .thenReturn(statement);
         database.setListener(new Database.Adapter(){
             @Override public void onGetConnection(Connection connection) throws SQLException {
                 connection.setAutoCommit(false);
@@ -91,6 +94,8 @@ public class DatabaseUnitTests {
     }
 
     @Test public void should_report_query_timeout() throws Exception {
+        when(connection.createStatement())
+            .thenReturn(statement);
         when(statement.execute(anyString()))
                 .thenThrow(new SQLTimeoutException("testing query timeout handling"));
         try {
@@ -106,6 +111,8 @@ public class DatabaseUnitTests {
     }
 
     @Test public void should_report_query_error() throws Exception {
+        when(connection.createStatement())
+            .thenReturn(statement);
         when(statement.execute(anyString()))
                 .thenThrow(new SQLException("testing query error handling"));
         try {

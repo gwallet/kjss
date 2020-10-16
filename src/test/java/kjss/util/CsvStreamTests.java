@@ -1,6 +1,6 @@
 package kjss.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -17,11 +17,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CsvStreamTests {
     @Test public void should_distinct_random_lines() {
@@ -33,7 +33,7 @@ public class CsvStreamTests {
             .noHeader()
             .map(row -> Integer.parseInt(row.get(0).toString()))
             .collect(Collectors.toSet());
-        assertEquals("Should get 300 integers", integers.size(), batchSize);
+        assertEquals(batchSize, integers.size(), "Should get 300 integers");
     }
 
     @Test public void should_distinct_sequential_lines() {
@@ -46,7 +46,7 @@ public class CsvStreamTests {
             .noHeader()
             .map(row -> Integer.parseInt(row.get(0).toString()))
             .collect(Collectors.toSet());
-        assertEquals("Should get 300 integers", integers.size(), batchSize);
+        assertEquals(batchSize, integers.size(), "Should get 300 integers");
     }
 
     @Test public void should_distinct_sequential_batch_lines() {
@@ -60,7 +60,7 @@ public class CsvStreamTests {
             .noHeader()
             .map(row -> Integer.parseInt(row.get(0).toString()))
             .collect(Collectors.toSet());
-        assertEquals("Should get 300 integers", integers.size(), batchSize);
+        assertEquals(batchSize, integers.size(), "Should get 300 integers");
     }
 
     @Test public void should_parse_csv_file() throws Exception {
@@ -72,9 +72,9 @@ public class CsvStreamTests {
         AtomicInteger count = new AtomicInteger(0);
         stream("simple.csv")
             .forEach((row, at) -> {
-                assertArrayEquals("Should list 'id' and 'name' as columns, in that order", new String[] {"id", "name"}, row.columns());
-                assertEquals("Should get the expected row content", expected.get(row.get("id").toString()), row.get("name").toString());
-                assertEquals("Should get the expected row content", expected.get(row.get(0).toString()), row.get(1).toString());
+                assertArrayEquals(new String[] {"id", "name"}, row.columns(), "Should list 'id' and 'name' as columns, in that order");
+                assertEquals(expected.get(row.get("id").toString()), row.get("name").toString(), "Should get the expected row content");
+                assertEquals(expected.get(row.get(0).toString()), row.get(1).toString(), "Should get the expected row content");
                 count.incrementAndGet();
             });
         assertEquals(3, count.intValue());
@@ -90,9 +90,9 @@ public class CsvStreamTests {
         stream("no_header.csv")
             .noHeader()
             .forEach((row, at) -> {
-                assertEquals("Row index should match row 'id' value", row.get(0).toInt(), at);
-                assertNull("Should not have header", row.header());
-                assertEquals("Should get the expected row content", expected.get(row.get(0).toInt()), row.get(1).toString());
+                assertEquals(row.get(0).toInt(), at, "Row index should match row 'id' value");
+                assertNull(row.header(), "Should not have header");
+                assertEquals( expected.get(row.get(0).toInt()), row.get(1).toString(), "Should not have header");
                 count.incrementAndGet();
             });
         assertEquals(3, count.intValue());
@@ -108,9 +108,9 @@ public class CsvStreamTests {
         stream("simple.scsv")
             .withSeparator(';')
             .forEach((row, at) -> {
-                assertArrayEquals("Should list 'id' and 'name' as columns, in that order", new String[] {"id", "name"}, row.columns());
-                assertEquals("Should get the expected row content", expected.get(row.get("id").toInt()), row.get("name").toString());
-                assertEquals("Should get the expected row content", expected.get(row.get(0).toInt()), row.get(1).toString());
+                assertArrayEquals(new String[] {"id", "name"}, row.columns(), "Should list 'id' and 'name' as columns, in that order");
+                assertEquals(expected.get(row.get("id").toInt()), row.get("name").toString(), "Should get the expected row content");
+                assertEquals(expected.get(row.get(0).toInt()), row.get(1).toString(), "Should get the expected row content");
                 count.incrementAndGet();
             });
         assertEquals(3, count.intValue());
@@ -121,11 +121,11 @@ public class CsvStreamTests {
         stream("null_values.csv")
             .forEach((row, at) -> {
                 if (at == 1)
-                    assertTrue("Should read null 'id' at row " + at, row.get("id").isNull());
+                    assertTrue(row.get("id").isNull(), "Should read null 'id' at row " + at);
                 if (at == 2)
-                    assertTrue("Should read null 'first_name' at row " + at, row.get("first_name").isNull());
+                    assertTrue(row.get("first_name").isNull(), "Should read null 'first_name' at row " + at);
                 if (at == 3)
-                    assertTrue("Should read null 'last_name' at row " + at, row.get("last_name").isNull());
+                    assertTrue(row.get("last_name").isNull(), "Should read null 'last_name' at row " + at);
                 checked.set(true);
             });
         assertTrue(checked.get());
@@ -135,7 +135,7 @@ public class CsvStreamTests {
         AtomicBoolean checked = new AtomicBoolean(false);
         stream("field_delimiter.csv")
                 .forEach((row, at) -> {
-                    assertEquals("Should get the expected row content", "Name, Email", row.get("col").toString());
+                    assertEquals("Name, Email", row.get("col").toString(), "Should get the expected row content");
                     checked.set(true);
                 });
         assertTrue(checked.get());
@@ -146,7 +146,7 @@ public class CsvStreamTests {
         UUID expected = UUID.fromString("AE012D8C-EA99-4944-9DBD-EA3E2E743FDE");
         stream("uuid.csv")
                 .forEach((row, at) -> {
-                    assertEquals("Should get the expected row content", expected, row.get("uuid").as(UUID::fromString));
+                    assertEquals(expected, row.get("uuid").as(UUID::fromString), "Should get the expected row content");
                     checked.set(true);
                 });
         assertTrue(checked.get());

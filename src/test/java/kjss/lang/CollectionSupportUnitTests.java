@@ -16,12 +16,12 @@
  */
 package kjss.lang;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
 import static kjss.lang.CollectionSupport.isNullOrEmpty;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CollectionSupportUnitTests {
     @Test public void should_return_true_on_empty_collection() throws Exception {

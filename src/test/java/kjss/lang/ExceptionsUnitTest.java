@@ -16,34 +16,30 @@
  */
 package kjss.lang;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import static kjss.lang.Exceptions.unchecked;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.isA;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExceptionsUnitTest {
 
-    @Rule public ExpectedException expectedException = ExpectedException.none();
-
     @Test public void should_wrap_exception_in_runtime() throws Exception {
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectCause(isA(CheckedException.class));
-        die();
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> {
+            throw unchecked(new CheckedException());
+        });
+        assertThat(runtimeException.getCause())
+            .isInstanceOf(CheckedException.class);
     }
 
     @Test public void should_wrap_exception_from_Runnable_in_runtime() throws Exception {
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectCause(isA(CheckedException.class));
-        Exceptions.unchecked(() -> {
-            throw new CheckedException();
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> {
+            Exceptions.unchecked(() -> {
+                throw new CheckedException();
+            });
         });
-    }
-
-    private void die() {
-        throw unchecked(new CheckedException());
+        assertThat(runtimeException.getCause())
+            .isInstanceOf(CheckedException.class);
     }
 
     class CheckedException extends Exception {
