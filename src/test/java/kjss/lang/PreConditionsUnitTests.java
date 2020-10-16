@@ -37,6 +37,7 @@ public class PreConditionsUnitTests {
     public static final Object[] EMPTY_ARRAY = new Object[0];
     public static final Object[] NOT_EMPTY_ARRAY = new Object[] {NOT_NULL_OBJECT};
     public static final int MAGIC_NUMBER = 42;
+    public static final long BIG_MAGIC_NUMBER = ((long) Integer.MAX_VALUE) + 1;
     public static final String ERROR_MESSAGE = "message";
 
     @Rule public ExpectedException expectedException = ExpectedException.none();
@@ -59,6 +60,11 @@ public class PreConditionsUnitTests {
     @Test public void should_throw_IllegalArgumentException_on_empty_array() throws Exception {
         expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
         when(EMPTY_ARRAY).isEmpty().throwIllegalArgument(ERROR_MESSAGE);
+    }
+
+    @Test public void should_throw_IllegalArgumentException_when_array_not_empty() throws Exception {
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
+        when(NOT_EMPTY_ARRAY).sizeDifferentThan(0).throwIllegalArgument(ERROR_MESSAGE);
     }
 
     @Test public void should_throw_IllegalArgumentException_on_empty_string() throws Exception {
@@ -86,6 +92,11 @@ public class PreConditionsUnitTests {
         when(MAGIC_NUMBER).isLowerThanOrEqualTo(MAGIC_NUMBER).throwIllegalArgument(ERROR_MESSAGE);
     }
 
+    @Test public void should_throw_IllegalArgumentException_on_not_negative_big_numbers() throws Exception {
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE);
+        when(BIG_MAGIC_NUMBER).isGreaterThan(0).throwIllegalArgument(ERROR_MESSAGE);
+    }
+
     @Test public void should_throw_IllegalStateException_on_enum_equals() throws Exception {
         expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
         when(Enum.This).isEqualTo(Enum.This).throwIllegalState(ERROR_MESSAGE);
@@ -103,6 +114,11 @@ public class PreConditionsUnitTests {
     @Test public void should_throw_IllegalStateException_on_collection_containing_object() throws Exception {
         expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
         when(NOT_EMPTY_COLLECTION).contains(NOT_NULL_OBJECT).throwIllegalState(ERROR_MESSAGE);
+    }
+
+    @Test public void should_throw_IllegalStateException_on_collection_with_size_different_than_expected() throws Exception {
+        expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE);
+        when(NOT_EMPTY_COLLECTION).sizeDifferentThan(0).throwIllegalState(ERROR_MESSAGE);
     }
 
     @Test public void should_not_throw_IllegalStateException_on_collection_not_containing_object() throws Exception {

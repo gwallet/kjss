@@ -133,6 +133,20 @@ public class PreConditions {
         public PreCondition contains(Object object) {
             return isNull().or(collection.contains(object));
         }
+
+        public PreCondition sizeGreaterThan(int expectedSize) {
+            return isNull().or(collection.size() > expectedSize);
+        }
+
+        public PreCondition sizeLowerThan(int expectedSize) {
+            return isNull().or(collection.size() < expectedSize);
+        }
+
+        public PreCondition sizeDifferentThan(int expectedSize) {
+            return isNull()
+                .or(sizeGreaterThan(expectedSize))
+                .or(sizeLowerThan(expectedSize));
+        }
     }
 
     /**
@@ -156,6 +170,20 @@ public class PreConditions {
 
         public PreCondition isEmpty() {
             return isNull().or(array.length == 0);
+        }
+
+        public PreCondition sizeLowerThan(int expectedSize) {
+            return isNull().or(array.length < expectedSize);
+        }
+
+        public PreCondition sizeGreaterThan(int expectedSize) {
+            return isNull().or(array.length > expectedSize);
+        }
+
+        public PreCondition sizeDifferentThan(int expectedSize) {
+            return isNull()
+                .or(sizeLowerThan(expectedSize))
+                .or(sizeGreaterThan(expectedSize));
         }
     }
 
@@ -200,6 +228,48 @@ public class PreConditions {
 
         public PreCondition isLowerThanOrEqualTo(C other) {
             return isNull().or(comparable.compareTo(other) <= 0);
+        }
+    }
+
+    /**
+     * Pre condition entry point on {@code long} values. Also works on {@code int} values.
+     *
+     * @param l the long value to be checked.
+     * @return Returns the {@link ComparablePreCondition} ready to be checked.
+     */
+    public static LongPreCondition when(long l) {
+        return new LongPreCondition(l);
+    }
+
+    public static class LongPreCondition {
+        private final long value;
+
+        LongPreCondition(long value) {
+            this.value = value;
+        }
+
+        public PreCondition isEqualTo(long other) {
+            return PreCondition.when(value == other);
+        }
+
+        public PreCondition isNotEqualTo(long other) {
+            return PreCondition.when(value != other);
+        }
+
+        public PreCondition isGreaterThan(long other) {
+            return PreCondition.when(value > other);
+        }
+
+        public PreCondition isGreaterThanOrEqualTo(long other) {
+            return PreCondition.when(value >= other);
+        }
+
+        public PreCondition isLowerThan(long other) {
+            return PreCondition.when(value < other);
+        }
+
+        public PreCondition isLowerThanOrEqualTo(long other) {
+            return PreCondition.when(value <= other);
         }
     }
 
