@@ -81,15 +81,21 @@ public class PreConditionUnitTests {
         when(LEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE_FORMAT, LEGAL_CONDITION);
     }
 
-    @Test public void should_combine_conditions() throws Exception {
+    @Test public void should_OR_conditions() throws Exception {
         expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
             when(LEGAL_CONDITION).or(ILLEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
         });
     }
 
-    @Test public void should_combine_conditions_inverse() throws Exception {
+    @Test public void should_OR_conditions_inverse() throws Exception {
         expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
             when(ILLEGAL_CONDITION).or(LEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
+        });
+    }
+
+    @Test public void should_AND_conditions() throws Exception {
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(ILLEGAL_CONDITION).and(ILLEGAL_CONDITION).throwIllegalArgument(ERROR_MESSAGE);
         });
     }
 

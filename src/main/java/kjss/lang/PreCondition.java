@@ -99,6 +99,22 @@ public abstract class PreCondition {
      */
     public abstract PreCondition or(PreCondition precondition);
 
+    /**
+     * Combine this pre condition with a new one according to AND logical operator.
+     *
+     * @param somethingWentWrong Boolean expression representing an illegal condition, i.e. what is considered as NOT wanted at runtime.
+     * @return Returns a new {@link PreCondition} that is the combination of both.
+     */
+    public abstract PreCondition and(boolean somethingWentWrong);
+
+    /**
+     * Combine this pre condition with a new one according to AND logical operator.
+     *
+     * @param precondition an other precondition.
+     * @return Returns a new {@link PreCondition} that is the combination of both.
+     */
+    public abstract PreCondition and(PreCondition precondition);
+
     /* package */ static PreCondition whenNot(boolean expectedCondition) {
         return when(!expectedCondition);
     }
@@ -124,6 +140,12 @@ public abstract class PreCondition {
         }
         @Override public PreCondition or(PreCondition precondition) {
             return precondition;
+        }
+        @Override public PreCondition and(boolean somethingWentWrong) {
+            return this;
+        }
+        @Override public PreCondition and(PreCondition precondition) {
+            return this;
         }
     }
 
@@ -158,6 +180,12 @@ public abstract class PreCondition {
         }
         @Override public PreCondition or(PreCondition precondition) {
             return this;
+        }
+        @Override public PreCondition and(boolean somethingWentWrong) {
+            return when(somethingWentWrong);
+        }
+        @Override public PreCondition and(PreCondition precondition) {
+            return precondition;
         }
     }
 }

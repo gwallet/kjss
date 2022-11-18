@@ -17,6 +17,7 @@
 package kjss.lang;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Armored Harm of defensive programming.
@@ -82,6 +83,18 @@ public class PreConditions {
 
         public PreCondition isNotNull() {
             return PreCondition.when(object != null);
+        }
+
+        public PreCondition isEqualTo(Object other) {
+            return PreConditions.when(object).isNotNull()
+                                .and(when(other).isNotNull())
+                                .and(PreCondition.when(object.equals(other)));
+        }
+
+        public PreCondition isNotEqualTo(Object other) {
+            return PreConditions.when(object).isNotNull()
+                                .and(when(other).isNotNull())
+                                .and(PreCondition.whenNot(object.equals(other)));
         }
     }
 
@@ -235,7 +248,7 @@ public class PreConditions {
      * Pre condition entry point on {@code long} values. Also works on {@code int} values.
      *
      * @param l the long value to be checked.
-     * @return Returns the {@link ComparablePreCondition} ready to be checked.
+     * @return Returns the {@link LongPreCondition} ready to be checked.
      */
     public static LongPreCondition when(long l) {
         return new LongPreCondition(l);
@@ -271,6 +284,29 @@ public class PreConditions {
         public PreCondition isLowerThanOrEqualTo(long other) {
             return PreCondition.when(value <= other);
         }
+    }
+
+    /**
+     * Pre condition entry point on {@code Optional} values.
+     *
+     * @param o the {@code Optional} value to be checked.
+     * @return Returns the {@link }
+     */
+    public static <T> OptionalPreCondition when(Optional<T> o) {
+        return new OptionalPreCondition<>(o);
+    }
+
+    public static class OptionalPreCondition<T> extends ObjectPreCondition {
+
+        private final Optional<T> value;
+
+        public OptionalPreCondition(Optional<T> optional) {
+            super(optional);
+            this.value = optional;
+        }
+
+        public PreCondition isAbsent() { return isNotNull().and(PreConditions.whenNot(value.isPresent())); }
+
     }
 
     private PreConditions() {}

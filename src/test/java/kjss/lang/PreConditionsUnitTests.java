@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -31,12 +32,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class PreConditionsUnitTests {
     public static final Object NULL_OBJECT = null;
     public static final Object NOT_NULL_OBJECT = new Object();
+    public static final Object OTHER_NOT_NULL_OBJECT = new Object();
     public static final String EMPTY_STRING = "";
     public static final String NOT_EMPTY_STRING = "NOT EMPTY STRING";
     public static final Collection<?> EMPTY_COLLECTION = emptyList();
     public static final Collection<?> NOT_EMPTY_COLLECTION = singletonList(NOT_NULL_OBJECT);
     public static final Object[] EMPTY_ARRAY = new Object[0];
     public static final Object[] NOT_EMPTY_ARRAY = new Object[] {NOT_NULL_OBJECT};
+    public static final Optional<?> EMPTY_OPTIONAL = Optional.empty();
+    public static final Optional<?> NOT_EMPTY_OPTIONAL = Optional.of(EMPTY_OPTIONAL);
     public static final int MAGIC_NUMBER = 42;
     public static final long BIG_MAGIC_NUMBER = ((long) Integer.MAX_VALUE) + 1;
     public static final String ERROR_MESSAGE = "message";
@@ -50,6 +54,18 @@ public class PreConditionsUnitTests {
     @Test public void should_throw_IllegalArgumentException_on_non_null_object() throws Exception {
         expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
             when(NOT_NULL_OBJECT).isNotNull().throwIllegalArgument(ERROR_MESSAGE);
+        });
+    }
+
+    @Test public void should_throw_IllegalArgumentException_on_non_equal_objects() throws Exception {
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(NOT_NULL_OBJECT).isNotEqualTo(OTHER_NOT_NULL_OBJECT).throwIllegalArgument(ERROR_MESSAGE);
+        });
+    }
+
+    @Test public void should_throw_IllegalArgumentException_on_equal_objects() throws Exception {
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(NOT_NULL_OBJECT).isEqualTo(NOT_NULL_OBJECT).throwIllegalArgument(ERROR_MESSAGE);
         });
     }
 
@@ -107,6 +123,12 @@ public class PreConditionsUnitTests {
         });
     }
 
+    @Test public void should_throw_IllegalArgumentException_on_absent_optional() throws Exception {
+        expectExceptionAndMessage(IllegalArgumentException.class, ERROR_MESSAGE, () -> {
+            when(EMPTY_OPTIONAL).isAbsent().throwIllegalArgument(ERROR_MESSAGE);
+        });
+    }
+
     @Test public void should_throw_IllegalStateException_on_enum_equals() throws Exception {
         expectExceptionAndMessage(IllegalStateException.class, ERROR_MESSAGE, () -> {
             when(Enum.This).isEqualTo(Enum.This).throwIllegalState(ERROR_MESSAGE);
@@ -151,6 +173,7 @@ public class PreConditionsUnitTests {
                 .or(when(MAGIC_NUMBER).isEqualTo(MAGIC_NUMBER + 1))
                 .or(when(NOT_EMPTY_COLLECTION).isEmpty())
                 .or(when(NOT_EMPTY_ARRAY).isEmpty())
+                .or(when(NOT_EMPTY_OPTIONAL).isAbsent())
                 .throwIllegalArgument(ERROR_MESSAGE);
     }
 
