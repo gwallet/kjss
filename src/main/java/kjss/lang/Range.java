@@ -20,9 +20,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static kjss.lang.PreConditions.when;
 
 /**
@@ -75,8 +75,7 @@ public final class Range<T> {
     private Boundary<T> high;
 
     public static <V> Range.Builder<V> builder(Comparator<V> comparator) {
-        Objects.requireNonNull(comparator);
-        return new Range.Builder<>(comparator);
+        return new Range.Builder<>(requireNonNull(comparator));
     }
 
     public static <C extends Comparable<C>> Range.Builder<C> builder() {
@@ -95,7 +94,6 @@ public final class Range<T> {
      * @see {@link Range#ofLocalDate()}
      */
     private Range(@Nullable T low, boolean lowInclusive, @Nullable T high, boolean highInclusive, Comparator<T> comparator) {
-        Objects.requireNonNull(comparator);
         this.low = Boundary.of(low, lowInclusive, comparator).orElse(Boundary.lowInfinity());
         this.high = Boundary.of(high, highInclusive, comparator).orElse(Boundary.highInfinity());
         when(this.low).isGreaterThan(this.high)
@@ -111,7 +109,7 @@ public final class Range<T> {
     }
 
     public boolean contains(T candidate) {
-        Objects.requireNonNull(candidate);
+        requireNonNull(candidate);
         return low.lowerThan(candidate) && high.higherThan(candidate);
     }
 
@@ -184,7 +182,7 @@ public final class Range<T> {
 
         FiniteBoundary(U value, Comparator<U> comparator) {
             this.value = value;
-            this.comparator = comparator;
+            this.comparator = requireNonNull(comparator);
         }
 
         @Override public boolean isFinite() {

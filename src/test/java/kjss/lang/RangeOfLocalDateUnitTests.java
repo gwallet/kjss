@@ -23,7 +23,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class LocalDateRangeUnitTests {
+public class RangeOfLocalDateUnitTests {
     @Test public void out_of_finite_range() throws Exception {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(5);

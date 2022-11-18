@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class IntegerRangeUnitTests {
+public class RangeOfIntegerUnitTests {
     @Test public void inclusive_finite_range() throws Exception {
         Range<Integer> range = Range.<Integer>builder()
                 .lowInclusive(1)
