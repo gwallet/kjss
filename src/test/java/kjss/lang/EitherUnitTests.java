@@ -39,6 +39,11 @@ public class EitherUnitTests {
         assertThat(either.map(identity(), integer -> integer.toString())).isEqualTo("42");
     }
 
+    @Test public void should_swap() throws Exception {
+        Either<String, Integer> either = Either.right(42);
+        assertThat(either.swap().left()).isEqualTo(42);
+    }
+
     @Test public void should_throw_when_is_right_and_asking_for_left() throws Exception {
         assertThrows(IllegalStateException.class, () -> {
             Either<String, Integer> either = Either.right(42);

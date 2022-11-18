@@ -52,6 +52,8 @@ public abstract class Either<A, B> {
         throw new IllegalStateException("This is not a right side");
     }
 
+    public abstract Either<B, A> swap();
+
     public abstract <T> T map(Function<A, T> mapLeft, Function<B, T> mapRight);
 
     final static class Left<L, R> extends Either<L, R> {
@@ -64,6 +66,9 @@ public abstract class Either<A, B> {
         }
         public L left() {
             return value;
+        }
+        public Either<R, L> swap() {
+            return right(value);
         }
         public <T> T map(Function<L, T> mapLeft, Function<R, T> mapRight) {
             return mapLeft.apply(value);
@@ -80,6 +85,9 @@ public abstract class Either<A, B> {
         }
         public R right() {
             return value;
+        }
+        public Either<R, L> swap() {
+            return left(value);
         }
         public <T> T map(Function<L, T> mapLeft, Function<R, T> mapRight) {
             return mapRight.apply(value);
