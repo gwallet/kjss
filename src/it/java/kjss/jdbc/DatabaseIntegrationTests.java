@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import javax.sql.DataSource;
 import java.sql.Statement;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.ninja_squad.dbsetup.Operations.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,12 +72,42 @@ public class DatabaseIntegrationTests {
     }
 
     @Test public void should_stream_query() throws Exception {
+        //  Given
+        List<String> frenchCities = List.of(
+            "Lille",
+            "Marseille",
+            "Paris"
+        );
+        AtomicInteger citiesFound = new AtomicInteger();
+
+        //  Then
         database.stream("SELECT name FROM city WHERE country_code = ?", row -> row.getString("name"), "FR")
-            .forEach(System.out::println);
+                .forEach(city -> {
+                    assertThat(frenchCities)
+                        .contains(city);
+                    citiesFound.incrementAndGet();
+                });
+        assertThat(citiesFound.get())
+            .isEqualTo(frenchCities.size());
     }
 
     @Test public void should_parallel_stream_query() throws Exception {
+        //  Given
+        List<String> frenchCities = List.of(
+            "Lille",
+            "Marseille",
+            "Paris"
+        );
+        AtomicInteger citiesFound = new AtomicInteger();
+
+        //  Then
         database.parallelStream("SELECT name FROM city WHERE country_code = ?", row -> row.getString("name"), "FR")
-            .forEach(System.out::println);
+                .forEach(city -> {
+                    assertThat(frenchCities)
+                        .contains(city);
+                    citiesFound.incrementAndGet();
+                });
+        assertThat(citiesFound.get())
+            .isEqualTo(frenchCities.size());
     }
 }
