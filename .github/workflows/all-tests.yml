@@ -15,10 +15,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Build with Maven
-      run: mvn -B -P all-tests verify --file pom.xml
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Install Java Dev Kit
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version-file: .java-version
+      - name: Build with Maven
+        run: mvn -B -P all-tests verify --file pom.xml
