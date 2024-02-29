@@ -23,6 +23,8 @@ import kjss.http.Http;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
 
@@ -41,7 +43,7 @@ class HttpClientIntegrationTests {
                 .willReturn(ok("Hello, World!")
                                 .withHeader("Content-Type", "application/json"))
         );
-        Http.Client httpClient = new HttpClient(new URL(wireMockRuntimeInfo.getHttpBaseUrl() + "/context"))
+        Http.Client httpClient = new HttpClient(url(wireMockRuntimeInfo.getHttpBaseUrl() + "/context"))
             .withConnectTimeout(Duration.ofSeconds(1))
             .withReadTimeout(Duration.ofMillis(500));
 
@@ -74,7 +76,7 @@ class HttpClientIntegrationTests {
                         .withBody("Hello, World!")
                         .withHeader(Http.Response.Headers.CONTENT_TYPE, Http.MediaType.APPLICATION_JSON.toString()))
         );
-        Http.Client httpClient = new HttpClient(new URL(wireMockRuntimeInfo.getHttpBaseUrl() + "/context"))
+        Http.Client httpClient = new HttpClient(url(wireMockRuntimeInfo.getHttpBaseUrl() + "/context"))
             .withConnectTimeout(Duration.ofSeconds(1))
             .withReadTimeout(Duration.ofMillis(500));
 
@@ -105,7 +107,7 @@ class HttpClientIntegrationTests {
                         .withBody("Hello, World!")
                         .withHeader(Http.Response.Headers.CONTENT_TYPE, Http.MediaType.APPLICATION_JSON.toString()))
         );
-        Http.Client httpClient = new HttpClient(new URL(wireMockRuntimeInfo.getHttpBaseUrl() + "/context"))
+        Http.Client httpClient = new HttpClient(url(wireMockRuntimeInfo.getHttpBaseUrl() + "/context"))
             .withConnectTimeout(Duration.ofSeconds(1))
             .withReadTimeout(Duration.ofMillis(500));
 
@@ -136,7 +138,7 @@ class HttpClientIntegrationTests {
                         .withBody("<html><body>This are not the droids you're looking for!</body></html>")
                 )
         );
-        Http.Client httpClient = new HttpClient(new URL(wireMockRuntimeInfo.getHttpBaseUrl() + "/context"))
+        Http.Client httpClient = new HttpClient(url(wireMockRuntimeInfo.getHttpBaseUrl() + "/context"))
             .withConnectTimeout(Duration.ofSeconds(1))
             .withReadTimeout(Duration.ofMillis(500));
 
@@ -158,7 +160,7 @@ class HttpClientIntegrationTests {
 
     @Test void should_handle_connection_error() throws Exception {
         // Given
-        Http.Client httpClient = new HttpClient(new URL( "http://localhost:999/context"))
+        Http.Client httpClient = new HttpClient(url( "http://localhost:999/context"))
             .withConnectTimeout(Duration.ofSeconds(1))
             .withReadTimeout(Duration.ofMillis(500));
 
@@ -166,6 +168,15 @@ class HttpClientIntegrationTests {
         Http.Request request = Http.get("/");
         assertThatThrownBy(() -> httpClient.exchange(request))
             .isInstanceOf(IOException.class);
+    }
+
+    private static URL url(String url) {
+        try {
+            return URI.create(url).toURL();
+        }
+        catch (MalformedURLException error) {
+            throw new RuntimeException(error);
+        }
     }
 
 }

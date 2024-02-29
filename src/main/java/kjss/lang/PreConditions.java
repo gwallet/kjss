@@ -292,7 +292,7 @@ public class PreConditions {
      * @param o the {@code Optional} value to be checked.
      * @return Returns the {@link }
      */
-    public static <T> OptionalPreCondition when(Optional<T> o) {
+    public static <T> OptionalPreCondition<T> when(Optional<T> o) {
         return new OptionalPreCondition<>(o);
     }
 

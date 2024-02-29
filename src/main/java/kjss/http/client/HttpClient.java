@@ -28,6 +28,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.time.Duration;
@@ -86,10 +87,8 @@ public class HttpClient implements Http.Client {
                 path = "/" + path;
             }
         }
-        URL requestUrl = new URL(baseUrl.getProtocol(),
-                                 baseUrl.getHost(),
-                                 baseUrl.getPort(),
-                                 baseUrl.getFile() + path);
+
+        URL requestUrl = URI.create(baseUrl + path).toURL();
         HttpURLConnection httpURLConnection = (HttpURLConnection) requestUrl.openConnection();
         httpURLConnection.setConnectTimeout((int) connectTimeout.toMillis());
         httpURLConnection.setReadTimeout((int) readTimeout.toMillis());
